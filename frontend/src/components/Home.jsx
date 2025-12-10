@@ -93,7 +93,9 @@ export default function Home({ user, navigate }) {
           ) : posts.length === 0 ? (
             <div className="home-empty">Chưa có bài viết nào.</div>
           ) : (
-            posts.map((p) => <PostCard key={p.id} post={p} />)
+            posts.map((p) => (
+              <PostCard key={p.id} post={p} onClick={() => navigate(`/article/${p.id}`)} />
+            ))
           )}
         </section>
       </main>
@@ -101,9 +103,9 @@ export default function Home({ user, navigate }) {
   );
 }
 
-function PostCard({ post }) {
+function PostCard({ post, onClick }) {
   return (
-    <article className="post-card">
+    <article className="post-card" onClick={onClick} style={{ cursor: "pointer" }}>
       <header className="post-header">
         <div className="post-author">
           <div className="post-avatar">{post.avatar || "☕"}</div>
@@ -116,8 +118,8 @@ function PostCard({ post }) {
           {post.type === "video"
             ? "Video"
             : post.type === "image"
-            ? "Hình ảnh"
-            : "Bài viết"}
+              ? "Hình ảnh"
+              : "Bài viết"}
         </span>
       </header>
 

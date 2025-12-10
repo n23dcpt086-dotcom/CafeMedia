@@ -11,6 +11,7 @@ import Campaign from "./components/Campaign";
 import SEO from "./components/SEO";
 import Profile from "./components/Profile";
 import Livestream from "./components/Livestream";
+import ArticleDetail from "./components/ArticleDetail";
 import { getCurrentUser } from "./api/authMock";
 
 function App() {
@@ -52,6 +53,11 @@ function App() {
 
   if (path === "/" || path === "/home") {
     return <Home user={user} navigate={navigate} />;
+  }
+
+  if (path.startsWith("/article/")) {
+    const id = path.split("/")[2];
+    return <ArticleDetail navigate={navigate} articleId={id} />;
   }
 
   if (path === "/profile") {
