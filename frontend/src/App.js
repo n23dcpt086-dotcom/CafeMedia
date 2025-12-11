@@ -5,6 +5,7 @@ import "./styles.css";
 
 import Auth from "./components/Auth";
 import Home from "./components/Home";
+import UserProfile from "./components/UserProfile";
 import Dashboard from "./components/Dashboard";
 import Editor from "./components/Editor";
 import Schedule from "./components/Schedule";
@@ -73,6 +74,10 @@ function App() {
   // ================================
   if (path === "/" || path === "/home") {
     return <Home user={user} navigate={navigate} />;
+  }
+
+  if (path === "/user") {
+    return <UserProfile navigate={navigate} />;
   }
 
   if (path === "/dashboard") {

@@ -21,10 +21,9 @@ export default function Auth({ navigate }) {
   const [okMsg, setOkMsg] = useState("");
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [signDob, setSignDob] = useState("");
+  const [signPhone, setSignPhone] = useState("");
 
-  // ================================
-  // LOGIN
-  // ================================
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setOkMsg("");
@@ -69,15 +68,12 @@ export default function Auth({ navigate }) {
     }
   };
 
-  // ================================
-  // SIGNUP
-  // ================================
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setOkMsg("");
 
-    if (!name.trim()) {
-      setErrorMsg("Vui lòng nhập họ tên.");
+    if (!name.trim() || !signEmail.trim() || !signDob.trim() || !signPhone.trim()) {
+      setErrorMsg("Vui lòng nhập đầy đủ thông tin.");
       return;
     }
 
@@ -99,6 +95,8 @@ export default function Auth({ navigate }) {
           name: name.trim(),
           email: signEmail.trim(),
           password: signPw1.trim(),
+          dateOfBirth: signDob.trim(),
+          phone: signPhone.trim()
         }),
       });
 
@@ -120,9 +118,6 @@ export default function Auth({ navigate }) {
     }
   };
 
-  // ================================
-  // RESET FORM
-  // ================================
   const openReset = (e) => {
     e.preventDefault();
     setResetOpen(true);
@@ -141,9 +136,6 @@ export default function Auth({ navigate }) {
     </>
   );
 
-  // ================================
-  // RENDER UI
-  // ================================
   return (
     <div className="auth-root">
       <div className="shell">
@@ -178,7 +170,7 @@ export default function Auth({ navigate }) {
             <div className="logo">☕</div>
             <div>
               <strong>Café Portal</strong>
-              <div className="note">Phiên bản demo</div>
+              <div className="note">Trang đăng nhập</div>
             </div>
           </div>
 
@@ -297,6 +289,31 @@ export default function Auth({ navigate }) {
                   placeholder="ban@company.com"
                   value={signEmail}
                   onChange={(e) => setSignEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="row">
+                <label htmlFor="sdob">Ngày sinh</label>
+                <input
+                  id="sdob"
+                  className="input"
+                  type="date"
+                  value={signDob}
+                  onChange={(e) => setSignDob(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="row">
+                <label htmlFor="sphone">Số điện thoại</label>
+                <input
+                  id="sphone"
+                  className="input"
+                  type="tel"
+                  placeholder="0123456789"
+                  value={signPhone}
+                  onChange={(e) => setSignPhone(e.target.value)}
                   required
                 />
               </div>

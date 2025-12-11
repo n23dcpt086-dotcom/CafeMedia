@@ -44,9 +44,9 @@ router.post("/login", async (req, res) => {
 // POST /api/auth/register
 // =============================
 router.post("/register", async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, dateOfBirth, phone } = req.body;
 
-    if (!name || !email || !password)
+    if (!name || !email || !password || !dateOfBirth || !phone)
         return res.status(400).json({ message: "Thiếu dữ liệu" });
 
     const exists = await Account.findOne({ where: { email } });
@@ -59,7 +59,9 @@ router.post("/register", async (req, res) => {
         name,
         email,
         password: hash,
-        role: "user"
+        role: "user",
+        date_of_birth: dateOfBirth,
+        phone
     });
 
     return res.json({

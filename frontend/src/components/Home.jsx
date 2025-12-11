@@ -67,6 +67,15 @@ export default function Home({ user, navigate }) {
             </div>
           )}
 
+          {user?.role === "user" && (
+            <button
+              className="home-btn-secondary"
+              onClick={() => navigate("/user")}
+            >
+              Tài khoản của tôi
+            </button>
+          )}
+
           {user?.role === "admin" && (
             <button className="home-btn-secondary" onClick={goDashboard}>
               Mở Dashboard
@@ -122,8 +131,8 @@ function PostCard({ post, onClick }) {
           {post.type === "video"
             ? "Video"
             : post.type === "image"
-            ? "Hình ảnh"
-            : "Bài viết"}
+              ? "Hình ảnh"
+              : "Bài viết"}
         </span>
       </header>
 

@@ -5,12 +5,12 @@ module.exports = {
     // ACCOUNTS
     await queryInterface.bulkInsert('accounts', [
       {
-        name: 'Admin User',
-        email: 'admin001@cafemedia.com',
-        password: '$2a$12$CkRLrd9RQ1gaJS12DowUCOi4TnYfm8Yaxgwsxfmu7b5dwl6ylLt5.', // password: admin001
+        name: 'Trần Thị Thuận Kiều',
+        email: 'n23dcpt086@gmail.com',
+        password: '$2a$12$pakdV6AaYgNDyB9SADVrZeNo7laY/Y2XBTkGxDZac4O0TfaHjsHGe', // password: n23dcpt086
         role: 'admin',
         phone: '0901234567',
-        date_of_birth: '1990-01-15',
+        date_of_birth: '2005-11-01',
         avatar: 'https://i.pravatar.cc/150?img=1',
         created_at: new Date(),
         updated_at: new Date()
@@ -56,6 +56,28 @@ module.exports = {
         phone: '0945678901',
         date_of_birth: '1997-03-15',
         avatar: 'https://i.pravatar.cc/150?img=5',
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        name: 'Nguyễn Thị Khánh An',
+        email: 'n23dcpt059@gmail.com',
+        password: '$2a$12$T60tve7iXqaAHydDq/p3M.CuUiF1eGczhwisi0pdNnbCYEAioJRhe', // password: n23dcpt059
+        role: 'admin',
+        phone: '0901234565',
+        date_of_birth: '2005-01-01',
+        avatar: 'https://i.pravatar.cc/150?img=1',
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        name: 'Trần Mai Chi',
+        email: 'n23dcpt067@gmail.com',
+        password: '$2a$12$/r9cuMvQ2.8gAUs6kpnIzO1ln1y5TfU7gh26yjX3vlAO3atJfyAwa', // password: n23dcpt067
+        role: 'admin',
+        phone: '0901234564',
+        date_of_birth: '2005-01-01',
+        avatar: 'https://i.pravatar.cc/150?img=1',
         created_at: new Date(),
         updated_at: new Date()
       }
