@@ -1,7 +1,6 @@
 // src/components/Auth.jsx
 import { useState } from "react";
 import "../styles.css";
-import { mockLogin, mockSignup } from "../api/authMock";
 
 export default function Auth({ navigate }) {
   const [tab, setTab] = useState("login");
@@ -23,7 +22,10 @@ export default function Auth({ navigate }) {
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
 
-  const handleLoginSubmit = (e) => {
+  // ================================
+  // LOGIN
+  // ================================
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setOkMsg("");
 
@@ -33,11 +35,29 @@ export default function Auth({ navigate }) {
     }
 
     try {
-      const user = mockLogin(loginEmail.trim(), loginPw.trim());
-      setErrorMsg("");
-      setOkMsg(`Đăng nhập thành công. Xin chào ${user.name}!`);
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: loginEmail.trim(),
+          password: loginPw.trim(),
+        }),
+      });
 
-      const target = "/";
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMsg(data.message || "Không đăng nhập được.");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setErrorMsg("");
+      setOkMsg(`Đăng nhập thành công. Xin chào ${data.user.name}!`);
+
+      const target = "/home";
 
       if (typeof navigate === "function") {
         navigate(target);
@@ -45,11 +65,14 @@ export default function Auth({ navigate }) {
         window.location.href = target;
       }
     } catch (err) {
-      setErrorMsg(err.message || "Không đăng nhập được.");
+      setErrorMsg("Lỗi kết nối server.");
     }
   };
 
-  const handleSignupSubmit = (e) => {
+  // ================================
+  // SIGNUP
+  // ================================
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setOkMsg("");
 
@@ -69,11 +92,22 @@ export default function Auth({ navigate }) {
     }
 
     try {
-      mockSignup({
-        name: name.trim(),
-        email: signEmail.trim(),
-        password: signPw1.trim(),
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: signEmail.trim(),
+          password: signPw1.trim(),
+        }),
       });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMsg(data.message || "Không tạo được tài khoản.");
+        return;
+      }
 
       setErrorMsg("");
       setOkMsg("Tạo tài khoản thành công. Hãy đăng nhập!");
@@ -82,10 +116,13 @@ export default function Auth({ navigate }) {
       setSignPw2("");
       setTab("login");
     } catch (err) {
-      setErrorMsg(err.message || "Không tạo được tài khoản.");
+      setErrorMsg("Lỗi kết nối server.");
     }
   };
 
+  // ================================
+  // RESET FORM
+  // ================================
   const openReset = (e) => {
     e.preventDefault();
     setResetOpen(true);
@@ -93,28 +130,20 @@ export default function Auth({ navigate }) {
 
   const handleResetSubmit = (e) => {
     e.preventDefault();
-    alert(
-      "Đã gửi liên kết khôi phục tới " +
-      (resetEmail.trim() || "email của bạn")
-    );
+    alert("Đã gửi liên kết khôi phục tới " + (resetEmail.trim() || "email của bạn"));
     setResetOpen(false);
   };
 
   const renderAlerts = () => (
     <>
-      {errorMsg && (
-        <div className="error" id="errorBox">
-          {errorMsg}
-        </div>
-      )}
-      {okMsg && (
-        <div className="ok" id="okBox">
-          {okMsg}
-        </div>
-      )}
+      {errorMsg && <div className="error" id="errorBox">{errorMsg}</div>}
+      {okMsg && <div className="ok" id="okBox">{okMsg}</div>}
     </>
   );
 
+  // ================================
+  // RENDER UI
+  // ================================
   return (
     <div className="auth-root">
       <div className="shell">
@@ -124,8 +153,7 @@ export default function Auth({ navigate }) {
           <div style={{ position: "relative", zIndex: 1 }}>
             <h1>Café Media Portal</h1>
             <p>
-              Đăng nhập để quản trị nội dung, lịch xuất bản, livestream và
-              chiến dịch đa kênh.
+              Đăng nhập để quản trị nội dung, lịch xuất bản, livestream và chiến dịch đa kênh.
             </p>
             <div className="kpis">
               <div className="kpi">
@@ -155,16 +183,10 @@ export default function Auth({ navigate }) {
           </div>
 
           {/* Tabs */}
-          <div
-            className="tabs"
-            role="tablist"
-            aria-label="Chuyển biểu mẫu"
-          >
+          <div className="tabs" role="tablist" aria-label="Chuyển biểu mẫu">
             <button
               type="button"
               className={`tab ${tab === "login" ? "active" : ""}`}
-              role="tab"
-              aria-selected={tab === "login"}
               onClick={() => {
                 setTab("login");
                 setErrorMsg("");
@@ -173,11 +195,10 @@ export default function Auth({ navigate }) {
             >
               Đăng nhập
             </button>
+
             <button
               type="button"
               className={`tab ${tab === "signup" ? "active" : ""}`}
-              role="tab"
-              aria-selected={tab === "signup"}
               onClick={() => {
                 setTab("signup");
                 setErrorMsg("");
@@ -206,6 +227,7 @@ export default function Auth({ navigate }) {
                   required
                 />
               </div>
+
               <div className="row field">
                 <label htmlFor="password">Mật khẩu</label>
                 <input
@@ -221,27 +243,22 @@ export default function Auth({ navigate }) {
                 <button
                   type="button"
                   className="toggle"
-                  aria-label="Hiện/ẩn mật khẩu"
                   onClick={() => setShowPwLogin((v) => !v)}
                 >
                   {showPwLogin ? "🙈" : "👁️"}
                 </button>
               </div>
+
               <div className="actions">
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: ".4rem",
-                  }}
-                >
+                <label style={{ display: "flex", alignItems: "center", gap: ".4rem" }}>
                   <input
                     type="checkbox"
                     checked={remember}
                     onChange={(e) => setRemember(e.target.checked)}
-                  />{" "}
+                  />
                   Ghi nhớ
                 </label>
+
                 <button
                   type="button"
                   id="forgotLink"
@@ -251,9 +268,8 @@ export default function Auth({ navigate }) {
                   Quên mật khẩu?
                 </button>
               </div>
-              <button className="btn primary" type="submit">
-                Đăng nhập
-              </button>
+
+              <button className="btn primary" type="submit">Đăng nhập</button>
             </form>
           )}
 
@@ -271,6 +287,7 @@ export default function Auth({ navigate }) {
                   required
                 />
               </div>
+
               <div className="row">
                 <label htmlFor="semail">Email</label>
                 <input
@@ -283,6 +300,7 @@ export default function Auth({ navigate }) {
                   required
                 />
               </div>
+
               <div className="row field">
                 <label htmlFor="spassword">Mật khẩu</label>
                 <input
@@ -303,6 +321,7 @@ export default function Auth({ navigate }) {
                   {showPw1 ? "🙈" : "👁️"}
                 </button>
               </div>
+
               <div className="row field">
                 <label htmlFor="spassword2">Nhập lại mật khẩu</label>
                 <input
@@ -323,51 +342,28 @@ export default function Auth({ navigate }) {
                   {showPw2 ? "🙈" : "👁️"}
                 </button>
               </div>
-              <button className="btn primary" type="submit">
-                Tạo tài khoản
-              </button>
+
+              <button className="btn primary" type="submit">Tạo tài khoản</button>
             </form>
           )}
 
-          <div
-            style={{
-              margin: "1rem 0",
-              textAlign: "center",
-              color: "#94a3b8",
-            }}
-          >
+          <div style={{ margin: "1rem 0", textAlign: "center", color: "#94a3b8" }}>
             — hoặc tiếp tục với —
           </div>
 
           <div className="social">
-            <button
-              className="sbtn"
-              onClick={() => alert("Redirect tới Google OAuth...")}
-            >
-              🔴 Google
-            </button>
-            <button
-              className="sbtn"
-              onClick={() => alert("Redirect tới Facebook OAuth...")}
-            >
-              🔵 Facebook
-            </button>
-            <button
-              className="sbtn"
-              onClick={() => alert("Redirect tới Zalo OAuth...")}
-            >
-              🔷 Zalo
-            </button>
+            <button className="sbtn" onClick={() => alert("Redirect tới Google OAuth...")}>🔴 Google</button>
+            <button className="sbtn" onClick={() => alert("Redirect tới Facebook OAuth...")}>🔵 Facebook</button>
+            <button className="sbtn" onClick={() => alert("Redirect tới Zalo OAuth...")}>🔷 Zalo</button>
           </div>
 
           <div className="footer">
-            Bằng việc tiếp tục, bạn đồng ý với{" "}
-            <a href="/terms">Điều khoản</a> và <a href="/privacy">Chính sách</a>.
+            Bằng việc tiếp tục, bạn đồng ý với <a href="/terms">Điều khoản</a> và <a href="/privacy">Chính sách</a>.
           </div>
         </div>
       </div>
 
-      {/* Reset modal (React-controlled) */}
+      {/* RESET MODAL */}
       {resetOpen && (
         <dialog
           open
@@ -380,12 +376,9 @@ export default function Auth({ navigate }) {
             boxShadow: "0 6px 24px rgba(15,23,42,.12)",
           }}
         >
-          <form
-            method="dialog"
-            style={{ padding: "1rem" }}
-            onSubmit={handleResetSubmit}
-          >
+          <form method="dialog" style={{ padding: "1rem" }} onSubmit={handleResetSubmit}>
             <h3 style={{ margin: ".2rem 0 1rem 0" }}>Khôi phục mật khẩu</h3>
+
             <div className="row">
               <label>Email</label>
               <input
@@ -397,6 +390,7 @@ export default function Auth({ navigate }) {
                 required
               />
             </div>
+
             <div
               style={{
                 display: "flex",
@@ -405,16 +399,8 @@ export default function Auth({ navigate }) {
                 marginTop: ".5rem",
               }}
             >
-              <button
-                className="btn"
-                type="button"
-                onClick={() => setResetOpen(false)}
-              >
-                Huỷ
-              </button>
-              <button className="btn primary" type="submit">
-                Gửi liên kết
-              </button>
+              <button className="btn" type="button" onClick={() => setResetOpen(false)}>Huỷ</button>
+              <button className="btn primary" type="submit">Gửi liên kết</button>
             </div>
           </form>
         </dialog>

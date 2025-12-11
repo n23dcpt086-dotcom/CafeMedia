@@ -6,8 +6,8 @@ module.exports = {
     await queryInterface.bulkInsert('accounts', [
       {
         name: 'Admin User',
-        email: 'admin@cafemedia.com',
-        password: '$2a$10$X9ykrCdFXYT3YXLlL.HqOu8K0k4UdCw1YsKp8K7xXxJD9v9J6K7Jq', // password: admin123
+        email: 'admin001@cafemedia.com',
+        password: '$2a$12$CkRLrd9RQ1gaJS12DowUCOi4TnYfm8Yaxgwsxfmu7b5dwl6ylLt5.', // password: admin001
         role: 'admin',
         phone: '0901234567',
         date_of_birth: '1990-01-15',
@@ -17,8 +17,8 @@ module.exports = {
       },
       {
         name: 'Nguyễn Văn A',
-        email: 'nguyenvana@cafemedia.com',
-        password: '$2a$10$X9ykrCdFXYT3YXLlL.HqOu8K0k4UdCw1YsKp8K7xXxJD9v9J6K7Jq', // password: user123
+        email: 'user001@cafemedia.com',
+        password: '$2a$12$2IqmMivBOqC58.5t8324OeqaSdzeTO5Ey4vyMG8dWS0qtKSF7BtOC', // password: user001
         role: 'user',
         phone: '0912345678',
         date_of_birth: '1995-05-20',
@@ -28,8 +28,8 @@ module.exports = {
       },
       {
         name: 'Trần Thị B',
-        email: 'tranthib@cafemedia.com',
-        password: '$2a$10$X9ykrCdFXYT3YXLlL.HqOu8K0k4UdCw1YsKp8K7xXxJD9v9J6K7Jq', // password: user123
+        email: 'user002@cafemedia.com',
+        password: '$2a$12$HXXmHuXIgZ1ecVe2tlDVC.8MZedpJTj.HoMl2WDCMlOGDFGEnNJJO', // password: user002
         role: 'user',
         phone: '0923456789',
         date_of_birth: '1992-08-10',
@@ -39,8 +39,8 @@ module.exports = {
       },
       {
         name: 'Lê Văn C',
-        email: 'levanc@cafemedia.com',
-        password: '$2a$10$X9ykrCdFXYT3YXLlL.HqOu8K0k4UdCw1YsKp8K7xXxJD9v9J6K7Jq', // password: user123
+        email: 'user003@cafemedia.com',
+        password: '$2a$12$01DTJ3vRC9yhAD65a0PkZ.3h.VtTnlhHrtEA6SahY5t93yYqeENOq', // password: user003
         role: 'user',
         phone: '0934567890',
         date_of_birth: '1988-12-25',
@@ -50,23 +50,12 @@ module.exports = {
       },
       {
         name: 'Phạm Thị D',
-        email: 'phamthid@cafemedia.com',
-        password: '$2a$10$X9ykrCdFXYT3YXLlL.HqOu8K0k4UdCw1YsKp8K7xXxJD9v9J6K7Jq', // password: user123
+        email: 'user004d@cafemedia.com',
+        password: '$2a$12$oEPc1GZARCySggV2L7SEv.XBQxUVjnv1XZwqF33ZvLg0u.4WCTERW', // password: user004
         role: 'user',
         phone: '0945678901',
         date_of_birth: '1997-03-15',
         avatar: 'https://i.pravatar.cc/150?img=5',
-        created_at: new Date(),
-        updated_at: new Date()
-      },
-      {
-        name: 'Admin User',
-        email: 'admin@cafemedia.com',
-        password: '$2a$10$X9ykrCdFXYT3YXLlL.HqOu8K0k4UdCw1YsKp8K7xXxJD9v9J6K7Jq', // password: admin123
-        role: 'admin',
-        phone: '0901234567',
-        date_of_birth: '1990-01-15',
-        avatar: 'https://i.pravatar.cc/150?img=1',
         created_at: new Date(),
         updated_at: new Date()
       }

@@ -1,8 +1,8 @@
-// src/components/Home.jsx
+// /src/components/Home.jsx
+
 import { useEffect, useState } from "react";
 import "../styles.css";
 import { getHomePosts } from "../api/mock";
-import { mockLogout } from "../api/authMock";
 
 export default function Home({ user, navigate }) {
   const [posts, setPosts] = useState([]);
@@ -35,9 +35,11 @@ export default function Home({ user, navigate }) {
   };
 
   const handleLogout = () => {
-    mockLogout();
-    if (typeof navigate === "function") navigate("/login");
-    else window.location.href = "/login";
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    if (typeof navigate === "function") navigate("/auth");
+    else window.location.href = "/auth";
   };
 
   return (
@@ -64,11 +66,13 @@ export default function Home({ user, navigate }) {
               </div>
             </div>
           )}
+
           {user?.role === "admin" && (
             <button className="home-btn-secondary" onClick={goDashboard}>
               Mở Dashboard
             </button>
           )}
+
           <button className="home-btn" onClick={handleLogout}>
             Đăng xuất
           </button>
@@ -81,8 +85,8 @@ export default function Home({ user, navigate }) {
           <div>
             <h1>Welcome đến Café Media</h1>
             <p>
-              Cập nhật các câu chuyện, hình ảnh và video mới nhất từ quán cà
-              phê. Đây là luồng nội dung giả lập để bạn test frontend.
+              Cập nhật các câu chuyện, hình ảnh và video mới nhất từ quán cà phê.
+              Đây là luồng nội dung giả lập để bạn test frontend.
             </p>
           </div>
         </section>
@@ -118,8 +122,8 @@ function PostCard({ post, onClick }) {
           {post.type === "video"
             ? "Video"
             : post.type === "image"
-              ? "Hình ảnh"
-              : "Bài viết"}
+            ? "Hình ảnh"
+            : "Bài viết"}
         </span>
       </header>
 
@@ -138,7 +142,8 @@ function PostCard({ post, onClick }) {
             src={post.videoUrl}
             title={post.title}
             frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media;
+                   gyroscope; picture-in-picture"
             allowFullScreen
           />
         </div>
