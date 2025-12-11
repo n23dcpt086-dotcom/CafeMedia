@@ -1,3 +1,4 @@
+// models/Post.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
@@ -31,10 +32,6 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(500),
       allowNull: true
     },
-    type: {
-      type: DataTypes.ENUM('article', 'image', 'video'),
-      defaultValue: 'article'
-    },
     account_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -45,32 +42,12 @@ module.exports = (sequelize) => {
       onDelete: 'CASCADE'
     },
     status: {
-      type: DataTypes.ENUM('draft', 'pending', 'published'),
+      type: DataTypes.ENUM('draft', 'published'),
       defaultValue: 'draft'
     },
-    category: {
-      type: DataTypes.STRING(50),
+    tag: {
+      type: DataTypes.TEXT,
       allowNull: true
-    },
-    tags: {
-      type: DataTypes.JSON,
-      allowNull: true
-    },
-    likes: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    comments_count: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    views: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    time: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW
     },
     published_at: {
       type: DataTypes.DATE,
@@ -81,9 +58,7 @@ module.exports = (sequelize) => {
     timestamps: false,
     indexes: [
       { fields: ['account_id'] },
-      { fields: ['status'] },
-      { fields: ['time'] },
-      { fields: ['type'] }
+      { fields: ['status'] }
     ]
   });
 

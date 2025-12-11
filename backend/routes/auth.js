@@ -1,3 +1,5 @@
+// routes/auth.js
+
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
@@ -5,9 +7,6 @@ const jwt = require("jsonwebtoken");
 const { Account } = require("../models");
 const config = require("../config/config");
 
-// =============================
-// POST /api/auth/login
-// =============================
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
@@ -40,9 +39,6 @@ router.post("/login", async (req, res) => {
     });
 });
 
-// =============================
-// POST /api/auth/register
-// =============================
 router.post("/register", async (req, res) => {
     const { name, email, password, dateOfBirth, phone } = req.body;
 

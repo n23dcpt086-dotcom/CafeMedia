@@ -1,3 +1,4 @@
+// migrations/002-create-posts.js
 'use strict';
 
 /** @type {import('sequelize-cli').Migration} */
@@ -34,11 +35,6 @@ module.exports = {
         type: Sequelize.STRING(500),
         allowNull: true
       },
-      type: {
-        type: Sequelize.ENUM('article', 'image', 'video'),
-        defaultValue: 'article',
-        allowNull: false
-      },
       account_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -50,37 +46,13 @@ module.exports = {
         onDelete: 'CASCADE'
       },
       status: {
-        type: Sequelize.ENUM('draft', 'pending', 'published'),
+        type: Sequelize.ENUM('draft', 'published'),
         defaultValue: 'draft',
         allowNull: false
       },
-      category: {
-        type: Sequelize.STRING(50),
+      tag: {
+        type: Sequelize.TEXT,
         allowNull: true
-      },
-      tags: {
-        type: Sequelize.JSON,
-        allowNull: true
-      },
-      likes: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-        allowNull: false
-      },
-      comments_count: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-        allowNull: false
-      },
-      views: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-        allowNull: false
-      },
-      time: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
       published_at: {
         type: Sequelize.DATE,
@@ -92,21 +64,12 @@ module.exports = {
       engine: 'InnoDB'
     });
 
-    // Tạo indexes
     await queryInterface.addIndex('posts', ['account_id'], {
       name: 'idx_account'
     });
     
     await queryInterface.addIndex('posts', ['status'], {
       name: 'idx_status'
-    });
-    
-    await queryInterface.addIndex('posts', ['time'], {
-      name: 'idx_time'
-    });
-    
-    await queryInterface.addIndex('posts', ['type'], {
-      name: 'idx_type'
     });
   },
 

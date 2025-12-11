@@ -1,306 +1,175 @@
 // src/components/Editor.jsx
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../styles.css";
 
-// Import API functions
+const API_BASE = process.env.REACT_APP_API_BASE ?? "http://localhost:5000";
+const TOKEN_KEY = "token";
 const DRAFT_KEY = "editor-draft-v1";
 
-// Mock API functions (bạn có thể thay bằng API thực)
-const saveDraftApi = async (data) => {
-    await new Promise(r => setTimeout(r, 300));
-    const id = data.id || `article-${Date.now()}`;
-    return { ...data, id, savedAt: new Date().toISOString() };
-};
+async function fetchMyPosts() {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return [];
+    const res = await fetch(`${API_BASE}/posts/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) return [];
+    return res.json();
+}
 
-const submitArticleApi = async (id, note) => {
-    await new Promise(r => setTimeout(r, 300));
-    return { id, status: "pending", note };
-};
-
-const getCommentsApi = async (articleId) => {
-    await new Promise(r => setTimeout(r, 200));
-    return [
-        {
-            id: 1,
-            author: "@Trần Chi",
-            text: "Thêm ảnh minh hoạ và ghi thời gian ủ: 16h là hợp lý.",
-            target: "đoạn 'cold brew'",
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 2,
-            author: "@Ngọc Linh",
-            text: "SEO title ok. Thêm từ khoá 'công thức cà phê mùa đông'.",
-            target: "tiêu đề",
-            createdAt: new Date().toISOString()
-        }
-    ];
-};
-
-const addCommentApi = async (articleId, comment) => {
-    await new Promise(r => setTimeout(r, 200));
-    return {
-        id: Date.now(),
-        ...comment,
-        createdAt: new Date().toISOString()
-    };
-};
-
-export default function Editor({ navigate }) {
+export default function Editor() {
     const [title, setTitle] = useState("");
-    const [category, setCategory] = useState("Công thức");
-    const [selectedTags, setSelectedTags] = useState([]);
-    const [comments, setComments] = useState([]);
-    const [commentText, setCommentText] = useState("");
+    const [tag, setTag] = useState("");
+    const [myPosts, setMyPosts] = useState([]);
     const [currentArticleId, setCurrentArticleId] = useState(null);
-
-    // Drawer states
-    const [drawerExpanded, setDrawerExpanded] = useState(false);
-    const [drawerCollapsed, setDrawerCollapsed] = useState(false);
-
+    const [imageUrl, setImageUrl] = useState("");
+    const [imageFile, setImageFile] = useState("");
+    const [videoUrl, setVideoUrl] = useState("");
+    const [videoFile, setVideoFile] = useState("");
+    const [publishedAt, setPublishedAt] = useState("");
+    const [message, setMessage] = useState({ type: "", text: "" });
     const editorRef = useRef(null);
-
-    const availableTags = ["#CàPhêMùaĐông", "#ƯuĐãiGiángSinh", "#ComboSáng"];
 
     const loadDraft = () => {
         try {
             const raw = localStorage.getItem(DRAFT_KEY);
             if (!raw) return;
             const data = JSON.parse(raw);
-
             if (data.id) setCurrentArticleId(data.id);
             if (data.title) setTitle(data.title);
-            if (data.content && editorRef.current) {
-                editorRef.current.innerHTML = data.content;
-            }
-            if (data.category) setCategory(data.category);
-            if (Array.isArray(data.tags)) setSelectedTags(data.tags);
-        } catch (err) {
-            console.warn("Không load được draft:", err);
-        }
+            if (data.content && editorRef.current) editorRef.current.innerHTML = data.content;
+            if (data.tag) setTag(data.tag);
+            if (data.imageUrl) setImageUrl(data.imageUrl);
+            if (data.imageFile) setImageFile(data.imageFile);
+            if (data.videoUrl) setVideoUrl(data.videoUrl);
+            if (data.videoFile) setVideoFile(data.videoFile);
+            if (data.publishedAt) setPublishedAt(data.publishedAt);
+        } catch { }
     };
 
-    const loadComments = useCallback(async () => {
-        if (!currentArticleId) return;
-        try {
-            const list = await getCommentsApi(currentArticleId);
-            setComments(list);
-        } catch (err) {
-            console.warn("Không load được comments:", err);
-        }
-    }, [currentArticleId]);
+    const loadMyPosts = async () => {
+        const list = await fetchMyPosts();
+        setMyPosts(list);
+    };
 
     useEffect(() => {
         loadDraft();
-        loadComments();
-    }, [loadComments]);
+        loadMyPosts();
+    }, []);
 
-    // Toolbar actions
-    const applyBlock = (tag) => {
-        document.execCommand("formatBlock", false, tag);
-        editorRef.current?.focus();
+    const clearForm = () => {
+        setCurrentArticleId(null);
+        setTitle("");
+        setTag("");
+        setImageUrl("");
+        setImageFile("");
+        setVideoUrl("");
+        setVideoFile("");
+        setPublishedAt("");
+        if (editorRef.current) {
+            editorRef.current.innerHTML = "";
+        }
+        localStorage.removeItem(DRAFT_KEY);
+        setMessage({ type: "", text: "" });
     };
 
-    const applyInline = (cmd, value = null) => {
-        document.execCommand(cmd, false, value);
-        editorRef.current?.focus();
-    };
-
-    const handleToolbarAction = (action) => {
-        switch (action) {
-            case "h1":
-                applyBlock("H1");
-                break;
-            case "h2":
-                applyBlock("H2");
-                break;
-            case "bold":
-                applyInline("bold");
-                break;
-            case "italic":
-                applyInline("italic");
-                break;
-            case "list":
-                applyInline("insertUnorderedList");
-                break;
-            case "quote":
-                applyBlock("BLOCKQUOTE");
-                break;
-            case "link": {
-                const url = prompt("Nhập đường dẫn (URL):");
-                if (url) applyInline("createLink", url);
-                break;
-            }
-            case "image": {
-                const url = prompt("Nhập link ảnh (URL):");
-                if (url) {
-                    const html = `<figure><img src="${url}" alt="" style="max-width:100%;border-radius:12px"/><figcaption style="font-size:0.85rem;color:#6b7280">Chú thích ảnh</figcaption></figure>`;
-                    document.execCommand("insertHTML", false, html);
-                    editorRef.current?.focus();
-                }
-                break;
-            }
-            case "video": {
-                const url = prompt("Nhập link video (YouTube, v.v.):");
-                if (url) {
-                    const html = `<div class="embed" aria-label="Video embed">▶️ Nhúng video: ${url}</div>`;
-                    document.execCommand("insertHTML", false, html);
-                    editorRef.current?.focus();
-                }
-                break;
-            }
-            case "embed": {
-                const code = prompt("Nhập mã nhúng (embed code) hoặc link:");
-                if (code) {
-                    const html = `<div class="embed" aria-label="Embed">${code}</div>`;
-                    document.execCommand("insertHTML", false, html);
-                    editorRef.current?.focus();
-                }
-                break;
-            }
-            default:
-                break;
+    const handleImageFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImageFile(reader.result);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
-    // Save draft
-    const handleSaveDraft = async () => {
-        const data = {
-            id: currentArticleId || undefined,
-            title,
-            content: editorRef.current?.innerHTML || "",
-            category,
-            tags: selectedTags,
-            status: "draft",
-        };
+    const handleVideoFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setVideoFile(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+    const handleSchedule = async () => {
+        // Validation
+        if (!title.trim()) {
+            setMessage({ type: "error", text: "Tiêu đề không được để trống" });
+            return;
+        }
+        
+        const body = editorRef.current ? editorRef.current.innerHTML : "";
+        if (!body.trim()) {
+            setMessage({ type: "error", text: "Nội dung không được để trống" });
+            return;
+        }
+        
+        if (!tag.trim()) {
+            setMessage({ type: "error", text: "Thẻ (Tag) không được để trống" });
+            return;
+        }
+
+        if (!publishedAt) {
+            setMessage({ type: "error", text: "Ngày lên lịch không được để trống" });
+            return;
+        }
 
         try {
-            const saved = await saveDraftApi(data);
-            setCurrentArticleId(saved.id);
-            localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...data, id: saved.id }));
-            alert("Đã lưu nháp lên server (và localStorage).");
-        } catch (err) {
-            console.error(err);
-            alert("Lỗi khi lưu nháp lên server, tạm thời chỉ lưu localStorage.");
-        }
-    };
-
-    // Preview
-    const handlePreview = () => {
-        const content = editorRef.current?.innerHTML || "";
-        const titleText = title || "Không có tiêu đề";
-
-        const w = window.open("", "_blank", "width=960,height=600");
-        if (!w) {
-            alert("Trình duyệt chặn popup, hãy cho phép popup để xem trước.");
-            return;
-        }
-
-        w.document.write(`
-      <!doctype html>
-      <html lang="vi">
-      <head>
-        <meta charset="utf-8" />
-        <title>Xem trước bài viết</title>
-        <style>
-          body{
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
-            padding:24px;
-            background:#f8fafc;
-            color:#0f172a;
-          }
-          h1{font-size:28px;margin-bottom:16px;}
-          .content{background:#fff;border-radius:12px;padding:16px;line-height:1.7;}
-          .content img{max-width:100%;border-radius:12px;}
-          .meta{font-size:14px;color:#64748b;margin-bottom:8px;}
-        </style>
-      </head>
-      <body>
-        <h1>${titleText}</h1>
-        <div class="meta">Bản xem trước (demo, chưa xuất bản)</div>
-        <div class="content">${content}</div>
-      </body>
-      </html>
-    `);
-        w.document.close();
-    };
-
-    // Submit
-    const handleSubmit = async () => {
-        const content = editorRef.current?.innerHTML.trim() || "";
-
-        if (!title.trim() || !content) {
-            alert("Vui lòng điền đầy đủ tiêu đề và nội dung trước khi gửi duyệt.");
-            return;
-        }
-
-        if (!currentArticleId) {
-            try {
-                const draft = await saveDraftApi({
-                    title,
-                    content,
-                    category,
-                    tags: selectedTags,
-                    status: "draft",
-                });
-                setCurrentArticleId(draft.id);
-                localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draft, id: draft.id }));
-            } catch (err) {
-                console.error(err);
-                alert("Không thể lưu nháp trước khi gửi duyệt. Vui lòng thử lại.");
+            const token = localStorage.getItem(TOKEN_KEY);
+            if (!token) {
+                setMessage({ type: "error", text: "Vui lòng đăng nhập" });
                 return;
             }
-        }
 
-        try {
-            await submitArticleApi(currentArticleId, { note: "Gửi duyệt từ editor" });
-            alert("Đã gửi bài viết lên để duyệt thành công!");
-        } catch (err) {
-            console.error(err);
-            alert("Gửi duyệt thất bại. Vui lòng thử lại sau.");
-        }
-    };
+            const payload = {
+                id: currentArticleId,
+                title,
+                body,
+                tag,
+                imageUrl,
+                imageFile,
+                videoUrl,
+                videoFile,
+                status: "draft",
+                publishedAt
+            };
 
-    // Schedule
-    const handleSchedule = () => {
-        window.location.href = "/schedule.html?from=editor";
-    };
-
-    // Tag toggle
-    const toggleTag = (tag) => {
-        setSelectedTags(prev =>
-            prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-        );
-    };
-
-    // Comment
-    const handleSendComment = async () => {
-        if (!commentText.trim()) return;
-
-        if (!currentArticleId) {
-            alert("Bạn cần lưu nháp hoặc gửi duyệt để tạo bài viết trước khi bình luận.");
-            return;
-        }
-
-        try {
-            const newCmt = await addCommentApi(currentArticleId, {
-                author: "Bạn",
-                text: commentText,
-                target: "",
+            const res = await fetch(`${API_BASE}/posts`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
             });
-            setComments(prev => [newCmt, ...prev]);
-            setCommentText("");
-        } catch (err) {
-            console.error(err);
-            alert("Không gửi được bình luận. Vui lòng thử lại.");
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setMessage({ type: "error", text: data.message || "Có lỗi xảy ra" });
+                return;
+            }
+
+            setMessage({ type: "success", text: data.message });
+            clearForm();
+            await loadMyPosts();
+
+            // Auto clear message after 3 seconds
+            setTimeout(() => {
+                setMessage({ type: "", text: "" });
+            }, 3000);
+
+        } catch (error) {
+            console.error("Error scheduling post:", error);
+            setMessage({ type: "error", text: "Lỗi kết nối server" });
         }
     };
 
     return (
         <div className="app">
-            {/* Sidebar */}
             <aside className="sidebar">
                 <div className="brand">
                     <div className="brand-logo">✍️</div>
@@ -308,52 +177,34 @@ export default function Editor({ navigate }) {
                 </div>
 
                 <nav className="nav">
-                    <a href="/dashboard" className="nav-link">📊 <span>Dashboard</span></a>
-                    <a
-                        className="nav-link"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            navigate("/editor");
-                        }}
-                        href="/editor"
-                    >
-                        📝 <span>Nội dung</span>
-                    </a>
-                    <a href="/schedule" className="nav-link">📅 <span>Lịch xuất bản</span></a>
-                    <a href="/livestream" className="nav-link">🎥 <span>Livestream</span></a>
-                    <a href="/campaign" className="nav-link">📢 <span>Chiến dịch</span></a>
-                    <a href="/seo" className="nav-link">⚙️ <span>SEO & Hiệu năng</span></a>
-                    <a href="/profile" className="nav-link">👤 <span>Người dùng</span></a>
+                    <a href="/dashboard" className="nav-link">📊 Dashboard</a>
+                    <a href="/editor" className="nav-link active">📝 Nội dung</a>
+                    <a href="/schedule" className="nav-link">📅 Lịch xuất bản</a>
+                    <a href="/livestream" className="nav-link">🎥 Livestream</a>
+                    <a href="/campaign" className="nav-link">📢 Chiến dịch</a>
+                    <a href="/seo" className="nav-link">⚙️ SEO & Hiệu năng</a>
+                    <a href="/profile" className="nav-link">👤 Người dùng</a>
                 </nav>
-
-                <div className="spacer" />
-                <div className="user">
-                    <div className="meta"></div>
-                </div>
             </aside>
 
-            {/* Main */}
             <main className="main">
-                <div className="topbar">
-                    <div className="topbar-inner">
-                        <div className="crumbs">Soạn bài</div>
-                        <div style={{ marginLeft: "auto", display: "flex", gap: ".5rem" }}>
-                            <button className="btn ghost" onClick={handlePreview}>
-                                Xem trước
-                            </button>
-                            <button className="btn" onClick={handleSaveDraft}>
-                                Lưu nháp
-                            </button>
-                            <button className="btn primary" onClick={handleSubmit}>
-                                Gửi duyệt
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <div className="content editor-2col">
+                    <section className="editor-left">
+                        {message.text && (
+                            <div
+                                style={{
+                                    padding: "0.75rem",
+                                    marginBottom: "1rem",
+                                    borderRadius: "8px",
+                                    backgroundColor: message.type === "error" ? "#fee" : "#efe",
+                                    color: message.type === "error" ? "#c33" : "#363",
+                                    border: `1px solid ${message.type === "error" ? "#fcc" : "#cfc"}`
+                                }}
+                            >
+                                {message.text}
+                            </div>
+                        )}
 
-                <div className="content">
-                    {/* Editor + Approval bar */}
-                    <section className="editor-wrap">
                         <input
                             className="title-input"
                             placeholder="Tiêu đề bài viết"
@@ -361,140 +212,158 @@ export default function Editor({ navigate }) {
                             onChange={(e) => setTitle(e.target.value)}
                         />
 
-                        <div className="toolbar" role="toolbar" aria-label="Soạn thảo">
-                            <button className="tool" onClick={() => handleToolbarAction("h1")}>H1</button>
-                            <button className="tool" onClick={() => handleToolbarAction("h2")}>H2</button>
-                            <button className="tool" onClick={() => handleToolbarAction("bold")}>B</button>
-                            <button className="tool" onClick={() => handleToolbarAction("italic")}>I</button>
-                            <button className="tool" onClick={() => handleToolbarAction("list")}>Danh sách</button>
-                            <button className="tool" onClick={() => handleToolbarAction("quote")}>Trích dẫn</button>
-                            <button className="tool" onClick={() => handleToolbarAction("link")}>Liên kết</button>
-                            <button className="tool" onClick={() => handleToolbarAction("image")}>Ảnh</button>
-                            <button className="tool" onClick={() => handleToolbarAction("video")}>Video</button>
-                            <button className="tool" onClick={() => handleToolbarAction("embed")}>Embed</button>
+                        <div className="card" style={{ marginTop: "0.5rem", marginBottom: "1rem" }}>
+                            <div className="row">
+                                <label className="label">Thẻ (Tag) <span style={{color: "red"}}>*</span></label>
+                                <input
+                                    type="text"
+                                    className="input"
+                                    placeholder="Ví dụ: Cà Phê Mùa Đông, Ưu Đãi, Combo Sáng"
+                                    value={tag}
+                                    onChange={(e) => setTag(e.target.value)}
+                                />
+                                <small style={{ color: "var(--text-secondary)", marginTop: "0.25rem" }}>
+                                    Gợi ý: Cà Phê Mùa Đông, Ưu Đãi Giáng Sinh, Combo Sáng, Món Mới, Khuyến Mãi
+                                </small>
+                            </div>
                         </div>
 
+                        <div className="card" style={{ marginBottom: "1rem" }}>
+                            <div className="row" style={{ marginBottom: "1rem" }}>
+                                <label className="label">Ngày lên lịch <span style={{color: "red"}}>*</span></label>
+                                <input
+                                    type="datetime-local"
+                                    className="input"
+                                    value={publishedAt}
+                                    onChange={(e) => setPublishedAt(e.target.value)}
+                                    style={{ maxWidth: "300px" }}
+                                />
+                                <small style={{ color: "var(--text-secondary)", marginTop: "0.25rem" }}>
+                                    Chọn ngày và giờ bài viết sẽ được xuất bản
+                                </small>
+                            </div>
+                        </div>
+
+                        <div className="card" style={{ marginBottom: "1rem" }}>
+                            <h3 style={{ margin: "0 0 0.75rem 0", fontSize: "1rem", fontWeight: "700" }}>
+                                Media
+                            </h3>
+
+                            <div className="row" style={{ marginBottom: "0.75rem" }}>
+                                <label className="label">Link ảnh (URL)</label>
+                                <input
+                                    type="text"
+                                    className="input"
+                                    placeholder="https://example.com/link-to-image"
+                                    value={imageUrl}
+                                    onChange={(e) => setImageUrl(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="row" style={{ marginBottom: "0.75rem" }}>
+                                <label className="label">File ảnh (Upload)</label>
+                                <input
+                                    type="file"
+                                    className="input"
+                                    accept="image/*"
+                                    onChange={handleImageFileChange}
+                                />
+                                {imageFile && (
+                                    <img
+                                        src={imageFile}
+                                        alt="Preview"
+                                        style={{
+                                            marginTop: "0.5rem",
+                                            maxWidth: "100%",
+                                            maxHeight: "200px",
+                                            borderRadius: "8px",
+                                            border: "1px solid var(--border)"
+                                        }}
+                                    />
+                                )}
+                            </div>
+
+                            <div className="row" style={{ marginBottom: "0.75rem" }}>
+                                <label className="label">Link video (URL)</label>
+                                <input
+                                    type="text"
+                                    className="input"
+                                    placeholder="https://example.com/link-to-video"
+                                    value={videoUrl}
+                                    onChange={(e) => setVideoUrl(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="row">
+                                <label className="label">File video (Upload)</label>
+                                <input
+                                    type="file"
+                                    className="input"
+                                    accept="video/*"
+                                    onChange={handleVideoFileChange}
+                                />
+                                {videoFile && (
+                                    <video
+                                        src={videoFile}
+                                        controls
+                                        style={{
+                                            marginTop: "0.5rem",
+                                            width: "100%",
+                                            maxHeight: "200px",
+                                            border: "1px solid var(--border)",
+                                            borderRadius: "8px"
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        </div>
                         <article
                             className="editor"
                             ref={editorRef}
                             contentEditable="true"
-                            aria-label="Nội dung"
                             suppressContentEditableWarning
-                        >
-                            <h2>1. Hạt cà phê và tỉ lệ pha</h2>
-                            <p>Chọn hạt rang vừa, xay mịn vừa. Tỉ lệ gợi ý 1:15 (cà phê:nước) cho hương vị cân bằng.</p>
-                            <h2>2. Công thức cold brew cơ bản</h2>
-                            <p>Ủ lạnh 12–18 giờ, lọc kỹ, thêm sữa hoặc syrup theo khẩu vị.</p>
-                            <div className="embed" aria-label="YouTube embed">
-                                ▶️ Nhúng YouTube: https://youtube.com/watch?v=dQw4w9WgXcQ
-                            </div>
-                            <h2>3. Ảnh minh họa</h2>
-                            <p>[Ảnh] Ly cà phê mùa đông, bọt sữa mịn, topping quế.</p>
-                        </article>
+                        ></article>
 
-                        <div className="approval">
-                            <button className="btn" onClick={handleSubmit}>
-                                Gửi duyệt
-                            </button>
-                            <button className="btn primary" onClick={handleSchedule}>
-                                Lên lịch
-                            </button>
-                        </div>
                     </section>
 
-                    {/* Side meta */}
-                    <aside className="side">
-                        <div className="card">
-                            <h3>Thuộc tính</h3>
-                            <div className="row">
-                                <label className="label">Chuyên mục</label>
-                                <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                                    <option>Công thức</option>
-                                    <option>Tin tức</option>
-                                    <option>Ưu đãi</option>
-                                </select>
-                            </div>
-                            <div className="row">
-                                <label className="label">Thẻ (Tags)</label>
-                                <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap" }}>
-                                    {availableTags.map((tag) => (
-                                        <span
-                                            key={tag}
-                                            className={`tag ${selectedTags.includes(tag) ? "active" : ""}`}
-                                            onClick={() => toggleTag(tag)}
-                                            style={{ cursor: "pointer" }}
-                                        >
-                                            {tag}
-                                        </span>
-                                    ))}
+                    <aside className="editor-side">
+                        <section className="card" style={{ padding: "1rem", maxHeight: "220px", overflowY: "auto" }}>
+                            <h3>Bài viết của bạn</h3>
+
+                            {myPosts.length === 0 && <div>Chưa có bài viết.</div>}
+
+                            {myPosts.map((p) => (
+                                <div
+                                    key={p.id}
+                                    className="mypost-item"
+                                    onClick={() => {
+                                        setCurrentArticleId(p.id);
+                                        setTitle(p.title || "");
+                                        setTag(p.tag || "");
+                                        setImageUrl(p.image_url || "");
+                                        setImageFile(p.imageBase64 || "");
+                                        setVideoUrl(p.video_url || "");
+                                        setVideoFile(p.videoBase64 || "");
+                                        setPublishedAt(p.published_at ? new Date(p.published_at).toISOString().slice(0, 16) : "");
+                                        if (editorRef.current) {
+                                            editorRef.current.innerHTML = p.body || "";
+                                        }
+                                    }}
+                                >
+                                    <strong>{p.title}</strong>
+                                    <div className="mypost-meta">
+                                        {p.status} • {new Date(p.published_at).toLocaleDateString('vi-VN')}
+                                    </div>
                                 </div>
-                            </div>
+                            ))}
+                        </section>
+                        <div className="approval">
+                            <button className="btn primary" onClick={handleSchedule}>Lên lịch</button>
+                            <button className="btn" onClick={clearForm}>Soạn bài mới</button>
                         </div>
                     </aside>
                 </div>
             </main>
-
-            {/* Drawer */}
-            <aside
-                className={`drawer ${drawerExpanded ? "expanded" : ""} ${drawerCollapsed ? "collapsed" : ""}`}
-                aria-label="Bình luận nội bộ"
-            >
-                <header>
-                    <strong>Bình luận nội bộ</strong>
-                    <div style={{ display: "flex", gap: ".5rem" }}>
-                        <button
-                            className="btn"
-                            onClick={() => setDrawerExpanded(!drawerExpanded)}
-                        >
-                            {drawerExpanded ? "🗗 Thu nhỏ" : "🔍 Phóng to"}
-                        </button>
-                        <button
-                            className="btn"
-                            onClick={() => setDrawerCollapsed(!drawerCollapsed)}
-                        >
-                            {drawerCollapsed ? "🔼 Mở rộng" : "🔽 Thu gọn"}
-                        </button>
-                    </div>
-                </header>
-                <div className="items">
-                    {comments.map((cmt) => {
-                        const time = cmt.createdAt
-                            ? new Date(cmt.createdAt).toLocaleTimeString("vi-VN", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })
-                            : "";
-
-                        return (
-                            <div key={cmt.id} className="comment">
-                                <div className="meta">
-                                    <strong>{cmt.author}</strong>
-                                    {time && ` • ${time}`}
-                                    {cmt.target && ` • ${cmt.target}`}
-                                </div>
-                                <div>{cmt.text}</div>
-                            </div>
-                        );
-                    })}
-                </div>
-                <footer>
-                    <input
-                        className="input"
-                        placeholder="Viết bình luận @mention …"
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                e.preventDefault();
-                                handleSendComment();
-                            }
-                        }}
-                    />
-                    <button className="btn primary" onClick={handleSendComment}>
-                        Gửi
-                    </button>
-                </footer>
-            </aside>
         </div>
     );
 }

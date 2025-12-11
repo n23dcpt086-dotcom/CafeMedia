@@ -16,8 +16,10 @@ const sequelize = new Sequelize(
 );
 
 const Account = require('./Account')(sequelize);
+const Post = require('./Post')(sequelize);
 
 module.exports = {
   sequelize,
-  Account
+  Account,
+  Post
 };

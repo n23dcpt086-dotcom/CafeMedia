@@ -15,7 +15,6 @@ import Profile from "./components/Profile";
 import Livestream from "./components/Livestream";
 import ArticleDetail from "./components/ArticleDetail";
 
-// Đọc user từ localStorage
 function getCurrentUser() {
   const token = localStorage.getItem("token");
   if (!token) return null;
@@ -34,18 +33,14 @@ function App() {
   const [path, setPath] = useState(window.location.pathname);
   const [user, setUser] = useState(null);
 
-  // Load user khi app mount
   useEffect(() => {
     setUser(getCurrentUser());
-
-    // Nếu chưa đăng nhập → luôn chuyển sang Auth
     if (!getCurrentUser()) {
       window.history.replaceState({}, "", "/auth");
       setPath("/auth");
     }
   }, []);
 
-  // Theo dõi back/forward
   useEffect(() => {
     const handlePop = () => {
       setPath(window.location.pathname);
@@ -55,23 +50,16 @@ function App() {
     return () => window.removeEventListener("popstate", handlePop);
   }, []);
 
-  // Điều hướng thủ công
   const navigate = (to) => {
     window.history.pushState({}, "", to);
     setPath(to);
     setUser(getCurrentUser());
   };
 
-  // ================================
-  //  LUÔN HIỆN AUTH NẾU CHƯA LOGIN
-  // ================================
   if (!user) {
     return <Auth navigate={navigate} />;
   }
 
-  // ================================
-  //  CÁC ROUTE CÒN LẠI SAU KHI ĐĂNG NHẬP
-  // ================================
   if (path === "/" || path === "/home") {
     return <Home user={user} navigate={navigate} />;
   }
