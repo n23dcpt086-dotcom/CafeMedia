@@ -17,7 +17,7 @@ module.exports = {
       },
       {
         name: 'Nguyễn Văn A',
-        email: 'user001@cafemedia.com',
+        email: 'user001@gmail.com',
         password: '$2a$12$2IqmMivBOqC58.5t8324OeqaSdzeTO5Ey4vyMG8dWS0qtKSF7BtOC', // password: user001
         role: 'user',
         phone: '0912345678',
@@ -28,7 +28,7 @@ module.exports = {
       },
       {
         name: 'Trần Thị B',
-        email: 'user002@cafemedia.com',
+        email: 'user002@gmail.com',
         password: '$2a$12$HXXmHuXIgZ1ecVe2tlDVC.8MZedpJTj.HoMl2WDCMlOGDFGEnNJJO', // password: user002
         role: 'user',
         phone: '0923456789',
@@ -39,7 +39,7 @@ module.exports = {
       },
       {
         name: 'Lê Văn C',
-        email: 'user003@cafemedia.com',
+        email: 'user003@gmail.com',
         password: '$2a$12$01DTJ3vRC9yhAD65a0PkZ.3h.VtTnlhHrtEA6SahY5t93yYqeENOq', // password: user003
         role: 'user',
         phone: '0934567890',
@@ -50,7 +50,7 @@ module.exports = {
       },
       {
         name: 'Phạm Thị D',
-        email: 'user004d@cafemedia.com',
+        email: 'user004d@gmail.com',
         password: '$2a$12$oEPc1GZARCySggV2L7SEv.XBQxUVjnv1XZwqF33ZvLg0u.4WCTERW', // password: user004
         role: 'user',
         phone: '0945678901',

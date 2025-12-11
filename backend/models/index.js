@@ -18,8 +18,21 @@ const sequelize = new Sequelize(
 const Account = require('./Account')(sequelize);
 const Post = require('./Post')(sequelize);
 
-module.exports = {
+Post.belongsTo(Account, {
+  foreignKey: 'account_id',
+  as: 'author'
+});
+
+Account.hasMany(Post, {
+  foreignKey: 'account_id',
+  as: 'posts'
+});
+
+const db = {
   sequelize,
+  Sequelize,
   Account,
   Post
 };
+
+module.exports = db;

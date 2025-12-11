@@ -20,7 +20,7 @@ function authRequired(req, res, next) {
     }
 }
 
-// GET /api/users/me (giữ nguyên)
+// GET /api/users/me
 router.get("/me", authRequired, async (req, res) => {
     if (req.user.role !== "user") return res.status(403).json({ message: "Không có quyền" });
 
@@ -40,7 +40,7 @@ router.get("/me", authRequired, async (req, res) => {
 });
 
 
-// PATCH /api/users/me — cập nhật thông tin + đổi mật khẩu
+// PATCH /api/users/me
 router.patch("/me", authRequired, async (req, res) => {
     if (req.user.role !== "user") return res.status(403).json({ message: "Không có quyền" });
 
@@ -49,11 +49,8 @@ router.patch("/me", authRequired, async (req, res) => {
 
     const { name, dateOfBirth, phone, avatar, oldPassword, newPassword } = req.body;
 
-    // Không cho sửa email
     if (req.body.email)
         return res.status(400).json({ message: "Không được phép thay đổi email" });
-
-    // Cập nhật thông tin cơ bản
     if (name !== undefined) user.name = name;
     if (dateOfBirth !== undefined) user.date_of_birth = dateOfBirth;
     if (phone !== undefined) user.phone = phone;

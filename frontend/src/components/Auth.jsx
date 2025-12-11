@@ -201,10 +201,8 @@ export default function Auth({ navigate }) {
             </button>
           </div>
 
-          {/* Alerts */}
           {renderAlerts()}
-
-          {/* LOGIN FORM */}
+          
           {tab === "login" && (
             <form id="loginForm" noValidate onSubmit={handleLoginSubmit}>
               <div className="row">
@@ -265,7 +263,6 @@ export default function Auth({ navigate }) {
             </form>
           )}
 
-          {/* SIGNUP FORM */}
           {tab === "signup" && (
             <form id="signupForm" noValidate onSubmit={handleSignupSubmit}>
               <div className="row">
@@ -380,7 +377,6 @@ export default function Auth({ navigate }) {
         </div>
       </div>
 
-      {/* RESET MODAL */}
       {resetOpen && (
         <dialog
           open
@@ -401,7 +397,7 @@ export default function Auth({ navigate }) {
               <input
                 className="input"
                 type="email"
-                placeholder="ban@company.com"
+                placeholder="example@gmail.com"
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
                 required

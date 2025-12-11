@@ -2,7 +2,19 @@
 
 import { useEffect, useState } from "react";
 import "../styles.css";
-import { getHomePosts } from "../api/mock";
+
+const API_BASE = process.env.REACT_APP_API_BASE ?? "http://localhost:5000";
+
+async function getHomePosts() {
+  try {
+    const res = await fetch(`${API_BASE}/posts`);
+    if (!res.ok) return [];
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return [];
+  }
+}
 
 export default function Home({ user, navigate }) {
   const [posts, setPosts] = useState([]);
@@ -95,7 +107,7 @@ export default function Home({ user, navigate }) {
             <h1>Welcome đến Café Media</h1>
             <p>
               Cập nhật các câu chuyện, hình ảnh và video mới nhất từ quán cà phê.
-              Đây là luồng nội dung giả lập để bạn test frontend.
+              Khám phá nội dung mới nhất được chia sẻ bởi đội ngũ của chúng tôi.
             </p>
           </div>
         </section>
@@ -104,10 +116,10 @@ export default function Home({ user, navigate }) {
           {loading ? (
             <div className="home-loading">Đang tải bài viết…</div>
           ) : posts.length === 0 ? (
-            <div className="home-empty">Chưa có bài viết nào.</div>
+            <div className="home-empty">Chưa có bài viết nào được xuất bản.</div>
           ) : (
             posts.map((p) => (
-              <PostCard key={p.id} post={p} onClick={() => navigate(`/article/${p.id}`)} />
+              <PostCard key={p.id} post={p} onClick={() => navigate(`/post/${p.id}`)} />
             ))
           )}
         </section>
@@ -147,19 +159,25 @@ function PostCard({ post, onClick }) {
 
       {post.type === "video" && post.videoUrl && (
         <div className="post-media post-media-video">
-          <iframe
-            src={post.videoUrl}
-            title={post.title}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media;
-                   gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          {post.videoUrl.startsWith('data:video') ? (
+            <video controls style={{ width: "100%", maxHeight: "500px" }}>
+              <source src={post.videoUrl} type="video/mp4" />
+              Trình duyệt không hỗ trợ video.
+            </video>
+          ) : (
+            <iframe
+              src={post.videoUrl}
+              title={post.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media;
+                     gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
         </div>
       )}
 
       <footer className="post-footer">
-        <span>👍 {post.stats?.likes ?? 0}</span>
         <span>💬 {post.stats?.comments ?? 0}</span>
       </footer>
     </article>

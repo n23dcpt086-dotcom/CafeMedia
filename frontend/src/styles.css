@@ -3601,9 +3601,9 @@ label {
   }
 }
 
-/* === ARTICLE DETAIL PAGE === */
+/* === POST DETAIL PAGE (Thay thế phần ARTICLE DETAIL PAGE trong styles.css) === */
 
-.article-detail-root {
+.post-detail-root {
   max-width: 900px;
   margin: 1.5rem auto;
   padding: 0 1rem 2rem;
@@ -3611,11 +3611,11 @@ label {
   color: var(--text);
 }
 
-.article-topbar {
+.post-topbar {
   margin-bottom: 1rem;
 }
 
-.article-btn-back {
+.post-btn-back {
   background: #fff;
   border: 1px solid var(--border);
   padding: 0.45rem 0.8rem;
@@ -3624,12 +3624,12 @@ label {
   font-weight: 600;
 }
 
-.article-btn-back:hover {
+.post-btn-back:hover {
   background: var(--teal-50);
   border-color: var(--teal-600);
 }
 
-.article-container {
+.post-container {
   background: #fff;
   border-radius: 18px;
   padding: 1.5rem;
@@ -3637,26 +3637,26 @@ label {
   box-shadow: var(--shadow);
 }
 
-.article-title {
+.post-title {
   margin-top: 0;
   font-size: 1.8rem;
   font-weight: 800;
 }
 
-.article-meta {
+.post-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin: .8rem 0 1.2rem;
 }
 
-.article-author {
+.post-author {
   display: flex;
   align-items: center;
   gap: .6rem;
 }
 
-.article-avatar {
+.post-avatar {
   width: 40px;
   height: 40px;
   background: #f1f5f9;
@@ -3666,16 +3666,16 @@ label {
   font-size: 1.3rem;
 }
 
-.article-author-name {
+.post-author-name {
   font-weight: 600;
 }
 
-.article-date {
+.post-date {
   font-size: .85rem;
   color: var(--text-2);
 }
 
-.article-type-tag {
+.post-type-tag {
   padding: .25rem .6rem;
   border-radius: 999px;
   background: #eff6ff;
@@ -3683,31 +3683,32 @@ label {
   font-size: .8rem;
 }
 
-.article-body {
+.post-body {
   color: var(--text-2);
   font-size: 1rem;
   line-height: 1.6;
   margin-bottom: 1rem;
 }
 
-.article-media {
+.post-media {
   margin: 1rem 0;
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--border);
 }
 
-.article-media img {
+.post-media img {
   width: 100%;
   display: block;
 }
 
-.article-media-video iframe {
+.post-media-video iframe,
+.post-media-video video {
   width: 100%;
   min-height: 300px;
 }
 
-.article-footer {
+.post-footer {
   margin-top: 1rem;
   font-size: .9rem;
   display: flex;
@@ -3715,32 +3716,32 @@ label {
   color: var(--text-2);
 }
 
-.article-loading,
-.article-notfound {
+.post-loading,
+.post-notfound {
   text-align: center;
   padding: 2rem;
   color: var(--text-2);
 }
 
-/* === ARTICLE COMMENTS === */
+/* === POST COMMENTS === */
 
-.article-comments {
+.post-comments {
   margin-top: 2rem;
 }
 
-.article-comments-title {
+.post-comments-title {
   font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 1rem;
 }
 
-.article-comment-box {
+.post-comment-box {
   display: flex;
   gap: .5rem;
   margin-bottom: 1rem;
 }
 
-.article-comment-input {
+.post-comment-input {
   flex: 1;
   border: 1px solid var(--border);
   padding: .6rem .75rem;
@@ -3748,12 +3749,12 @@ label {
   font-size: .95rem;
 }
 
-.article-comment-input:focus {
+.post-comment-input:focus {
   outline: 2px solid var(--teal-50);
   border-color: var(--teal-600);
 }
 
-.article-comment-btn {
+.post-comment-btn {
   padding: .6rem 1rem;
   border-radius: 10px;
   border: 1px solid var(--teal-600);
@@ -3763,36 +3764,43 @@ label {
   font-weight: 600;
 }
 
-.article-comment-btn:hover {
+.post-comment-btn:hover {
   background: var(--teal-700);
 }
 
-.article-comment-list {
+.post-comment-list {
   display: grid;
   gap: 1rem;
 }
 
-.article-comment-item {
+.post-comment-item {
   border: 1px solid var(--border);
   background: #fff;
   padding: .75rem;
   border-radius: 12px;
 }
 
-.article-comment-author {
+.post-comment-author {
   font-weight: 700;
   color: var(--text);
   margin-bottom: .2rem;
 }
 
-.article-comment-text {
+.post-comment-text {
   color: var(--text-2);
   margin-bottom: .3rem;
 }
 
-.article-comment-time {
+.post-comment-time {
   font-size: .8rem;
   color: var(--text-2);
+}
+
+.post-nocmt {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--text-2);
+  font-style: italic;
 }
 
 /* ============================================

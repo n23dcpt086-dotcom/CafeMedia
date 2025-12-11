@@ -2,7 +2,8 @@
 
 const express = require("express");
 const router = express.Router();
-const { Post } = require("../models");
+const db = require("../models");
+const { Post, Account } = db;
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 
@@ -19,6 +20,77 @@ function auth(req, res, next) {
         return res.status(401).json({ message: "Token không hợp lệ" });
     }
 }
+
+// GET tất cả bài viết công khai
+router.get("/", async (req, res) => {
+    try {
+        const posts = await Post.findAll({
+            where: { status: "published" },
+            order: [["published_at", "DESC"]],
+            attributes: [
+                "id",
+                "title",
+                "body",
+                "status",
+                "tag",
+                "published_at",
+                "image_url",
+                "image",
+                "video_url",
+                "video"
+            ],
+            include: [
+                {
+                    model: Account,
+                    as: "author",
+                    attributes: ["id", "name", "avatar"]
+                }
+            ]
+        });
+
+        const postsWithMedia = posts.map(post => {
+            const postData = post.toJSON();
+            if (postData.image && Buffer.isBuffer(postData.image)) {
+                postData.imageBase64 = `data:image/jpeg;base64,${postData.image.toString('base64')}`;
+                delete postData.image;
+            }
+            if (postData.video && Buffer.isBuffer(postData.video)) {
+                postData.videoBase64 = `data:video/mp4;base64,${postData.video.toString('base64')}`;
+                delete postData.video;
+            }
+            let type = "text";
+            if (postData.video || postData.video_url || postData.videoBase64) {
+                type = "video";
+            } else if (postData.image || postData.image_url || postData.imageBase64) {
+                type = "image";
+            }
+
+            return {
+                id: postData.id,
+                title: postData.title,
+                body: postData.body,
+                author: postData.author?.name || "Admin",
+                avatar: postData.author?.avatar || "☕",
+                createdAt: new Date(postData.published_at).toLocaleDateString('vi-VN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                type: type,
+                imageUrl: postData.imageBase64 || postData.image_url,
+                videoUrl: postData.videoBase64 || postData.video_url,
+                tag: postData.tag
+            };
+        });
+
+        return res.json(postsWithMedia);
+    } catch (error) {
+        console.error("Error fetching public posts:", error);
+        return res.status(500).json({ message: "Lỗi server" });
+    }
+});
 
 // GET tất cả bài của user hiện tại
 router.get("/me", auth, async (req, res) => {
@@ -61,10 +133,13 @@ router.get("/me", auth, async (req, res) => {
     }
 });
 
+// POST tạo bài viết mới hoặc cập nhật
 router.post("/", auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const { id, title, body, tag, imageUrl, imageFile, videoUrl, videoFile, status, publishedAt } = req.body;
+        
+        // Validation
         if (!title || title.trim() === "") {
             return res.status(400).json({ message: "Tiêu đề không được để trống" });
         }

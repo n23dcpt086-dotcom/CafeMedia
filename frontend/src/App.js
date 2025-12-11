@@ -13,7 +13,7 @@ import Campaign from "./components/Campaign";
 import SEO from "./components/SEO";
 import Profile from "./components/Profile";
 import Livestream from "./components/Livestream";
-import ArticleDetail from "./components/ArticleDetail";
+import PostDetail from "./components/PostDetail";
 
 function getCurrentUser() {
   const token = localStorage.getItem("token");
@@ -72,9 +72,9 @@ function App() {
     return <Dashboard navigate={navigate} />;
   }
 
-  if (path.startsWith("/article/")) {
+  if (path.startsWith("/post/")) {
     const id = path.split("/")[2];
-    return <ArticleDetail navigate={navigate} articleId={id} />;
+    return <PostDetail navigate={navigate} postId={id} />;
   }
 
   if (path === "/profile") return <Profile navigate={navigate} />;

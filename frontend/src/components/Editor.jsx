@@ -95,7 +95,6 @@ export default function Editor() {
     };
 
     const handleSchedule = async () => {
-        // Validation
         if (!title.trim()) {
             setMessage({ type: "error", text: "Tiêu đề không được để trống" });
             return;
@@ -156,8 +155,6 @@ export default function Editor() {
             setMessage({ type: "success", text: data.message });
             clearForm();
             await loadMyPosts();
-
-            // Auto clear message after 3 seconds
             setTimeout(() => {
                 setMessage({ type: "", text: "" });
             }, 3000);
