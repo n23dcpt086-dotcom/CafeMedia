@@ -155,128 +155,95 @@ module.exports = {
       }
     ], {});
 
-    // COMMENTS (nếu cần)
-    await queryInterface.bulkInsert('comments', [
-      {
-        post_id: 1,
-        account_id: 2,
-        author: 'Nguyễn Văn A',
-        text: 'Bài viết rất hay và hữu ích! Cảm ơn admin đã chia sẻ.',
-        created_at: new Date('2024-11-01 10:00:00')
-      },
-      {
-        post_id: 1,
-        account_id: 1,
-        author: 'Trần Thị Thuận Kiều',
-        text: 'Cảm ơn bạn đã đọc!',
-        created_at: new Date('2024-11-01 11:00:00')
-      }
-    ], {});
-
     // COMMENTS
     await queryInterface.bulkInsert('comments', [
       {
         post_id: 1,
         account_id: 2,
-        author: 'Nguyễn Văn A',
         text: 'Bài viết rất hay và hữu ích! Cảm ơn admin đã chia sẻ.',
         created_at: new Date('2024-11-01 10:00:00')
       },
       {
         post_id: 1,
         account_id: 3,
-        author: 'Trần Thị B',
         text: 'Mình đã áp dụng và thấy rất hiệu quả. Thanks!',
         created_at: new Date('2024-11-01 11:30:00')
       },
       {
         post_id: 1,
         account_id: 4,
-        author: 'Lê Văn C',
         text: 'Có thể hướng dẫn chi tiết hơn được không ạ?',
         created_at: new Date('2024-11-01 14:00:00')
       },
       {
         post_id: 2,
         account_id: 1,
-        author: 'Admin User',
         text: 'Bài viết chất lượng! Keep up the good work!',
         created_at: new Date('2024-11-15 15:00:00')
       },
       {
         post_id: 2,
         account_id: 5,
-        author: 'Phạm Thị D',
         text: 'Mình đã thử theo các tips này và thấy engagement tăng lên rõ rệt.',
         created_at: new Date('2024-11-15 16:30:00')
       },
       {
         post_id: 3,
         account_id: 2,
-        author: 'Nguyễn Văn A',
         text: 'Video rất chi tiết và dễ hiểu. Cảm ơn bạn!',
         created_at: new Date('2024-11-20 17:00:00')
       },
       {
         post_id: 3,
         account_id: 4,
-        author: 'Lê Văn C',
         text: 'Mình có thể dùng những thiết bị nào để livestream?',
         created_at: new Date('2024-11-20 18:00:00')
       },
       {
         post_id: 3,
         account_id: 1,
-        author: 'Admin User',
         text: 'Bạn có thể dùng smartphone, webcam hoặc camera chuyên nghiệp đều được.',
         created_at: new Date('2024-11-20 18:30:00')
       },
       {
         post_id: 4,
         account_id: 3,
-        author: 'Trần Thị B',
         text: 'Xu hướng 2024 thật sự rất thú vị. Mình sẽ thử áp dụng.',
         created_at: new Date('2024-11-25 11:00:00')
       },
       {
         post_id: 4,
         account_id: 5,
-        author: 'Phạm Thị D',
         text: 'Bài viết rất insightful. Có thêm case study được không ạ?',
         created_at: new Date('2024-11-25 13:00:00')
       },
       {
         post_id: 6,
         account_id: 1,
-        author: 'Admin User',
         text: 'Những bức ảnh tuyệt đẹp! Việt Nam mình đẹp quá!',
         created_at: new Date('2024-11-28 09:00:00')
       },
       {
         post_id: 6,
         account_id: 2,
-        author: 'Nguyễn Văn A',
         text: 'Chụp ở đâu vậy bạn? Mình muốn đi thăm.',
         created_at: new Date('2024-11-28 10:30:00')
       },
       {
         post_id: 6,
         account_id: 3,
-        author: 'Trần Thị B',
         text: 'Góc chụp và màu sắc rất ấn tượng!',
         created_at: new Date('2024-11-28 14:00:00')
       },
       {
         post_id: 7,
         account_id: 2,
-        author: 'Nguyễn Văn A',
         text: 'Review chi tiết và khách quan. Thanks!',
         created_at: new Date('2024-12-01 16:00:00')
       },
       {
         post_id: 7,
         account_id: 4,
-        author: 'Lê Văn C',
         text: 'Mình đang cân nhắc mua sản phẩm này. Review giúp mình quyết định rồi.',
         created_at: new Date('2024-12-01 17:30:00')
       }

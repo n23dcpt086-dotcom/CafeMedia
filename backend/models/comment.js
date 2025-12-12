@@ -25,10 +25,6 @@ module.exports = (sequelize) => {
       },
       onDelete: 'CASCADE'
     },
-    author: {
-      type: DataTypes.STRING(100),
-      allowNull: false
-    },
     text: {
       type: DataTypes.TEXT,
       allowNull: false

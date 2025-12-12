@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import "../styles.css";
 
-const API_BASE = process.env.REACT_APP_API_BASE ?? "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_API_BASE ?? "http://localhost:5000/api";
 const TOKEN_KEY = "token";
 const DRAFT_KEY = "editor-draft-v1";
 

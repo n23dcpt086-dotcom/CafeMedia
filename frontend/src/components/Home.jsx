@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import "../styles.css";
 
-const API_BASE = process.env.REACT_APP_API_BASE ?? "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_API_BASE ?? "http://localhost:5000/api";
 
 async function getHomePosts() {
   try {
@@ -104,7 +104,7 @@ export default function Home({ user, navigate }) {
       <main className="home-main">
         <section className="home-hero-card">
           <div>
-            <h1>Welcome đến Café Media</h1>
+            <h1>Chào mừng đến Café Media</h1>
             <p>
               Cập nhật các câu chuyện, hình ảnh và video mới nhất từ quán cà phê.
               Khám phá nội dung mới nhất được chia sẻ bởi đội ngũ của chúng tôi.

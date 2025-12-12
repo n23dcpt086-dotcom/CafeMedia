@@ -15,8 +15,11 @@ const sequelize = new Sequelize(
   }
 );
 
-const Account = require('./Account')(sequelize);
-const Post = require('./Post')(sequelize);
+// Import tất cả models
+const Account = require('./account')(sequelize);
+const Post = require('./post')(sequelize);
+const Comment = require('./comment')(sequelize);
+const Schedule = require('./schedule')(sequelize);
 
 Post.belongsTo(Account, {
   foreignKey: 'account_id',
@@ -28,11 +31,53 @@ Account.hasMany(Post, {
   as: 'posts'
 });
 
+Comment.belongsTo(Post, {
+  foreignKey: 'post_id',
+  as: 'post'
+});
+
+Comment.belongsTo(Account, {
+  foreignKey: 'account_id',
+  as: 'author'
+});
+
+Post.hasMany(Comment, {
+  foreignKey: 'post_id',
+  as: 'comments'
+});
+
+Account.hasMany(Comment, {
+  foreignKey: 'account_id',
+  as: 'comments'
+});
+
+Schedule.belongsTo(Account, {
+  foreignKey: 'account_id',
+  as: 'account'
+});
+
+Schedule.belongsTo(Post, {
+  foreignKey: 'post_id',
+  as: 'post'
+});
+
+Account.hasMany(Schedule, {
+  foreignKey: 'account_id',
+  as: 'schedules'
+});
+
+Post.hasMany(Schedule, {
+  foreignKey: 'post_id',
+  as: 'schedules'
+});
+
 const db = {
   sequelize,
   Sequelize,
   Account,
-  Post
+  Post,
+  Comment,
+  Schedule
 };
 
 module.exports = db;

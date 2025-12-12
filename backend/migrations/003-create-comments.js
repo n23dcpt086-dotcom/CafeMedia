@@ -30,10 +30,6 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      author: {
-        type: Sequelize.STRING(100),
-        allowNull: false
-      },
       text: {
         type: Sequelize.TEXT,
         allowNull: false

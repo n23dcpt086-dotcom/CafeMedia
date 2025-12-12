@@ -13,7 +13,9 @@ app.use(express.json());
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
-app.use("/posts", require("./routes/posts"));
+app.use("/api/posts", require("./routes/posts"));
+app.use('/api/comments', require('./routes/comments'));
+app.use('/api/schedules', require('./routes/schedules'));
 
 sequelize.authenticate().then(() => {
   console.log("Database connected");

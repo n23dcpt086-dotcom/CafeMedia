@@ -5,37 +5,96 @@ import "../styles.css";
 const pad = (n) => String(n).padStart(2, "0");
 const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
+const API_URL = "http://localhost:5000/api";
+
 export default function Schedule({ navigate }) {
   const path = typeof window !== "undefined" ? window.location.pathname : "/schedule.html";
-  const isScheduleActive = path === "/schedule.html" || path === "/schedule";
+  const isScheduleActive = path === "/schedule";
 
-  // State
   const [view, setView] = useState(new Date());
   const [selectedISO, setSelectedISO] = useState(null);
   const [events, setEvents] = useState({});
+  const [draftPosts, setDraftPosts] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     date: "",
     channel: "fb",
-    note: ""
+    post_id: ""
   });
+  const [loading, setLoading] = useState(false);
 
-  // Helper functions
   const channelClass = (ch) => {
     return ch === "fb" ? "fb" : ch === "yt" ? "yt" : ch === "tt" ? "tt" : "web";
   };
 
-  // Initialize with demo data
+  const fetchSchedules = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/schedules`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const schedules = await response.json();
+        console.log("Schedules fetched:", schedules);
+        
+        // Convert schedules to events format
+        const eventsMap = {};
+        schedules.forEach(schedule => {
+          const dateKey = schedule.publish_date;
+          if (!eventsMap[dateKey]) {
+            eventsMap[dateKey] = [];
+          }
+          eventsMap[dateKey].push({
+            id: schedule.id,
+            title: schedule.title,
+            channel: schedule.channel,
+            note: schedule.note,
+            post_id: schedule.post_id,
+            post: schedule.post
+          });
+        });
+
+        console.log("Events map:", eventsMap);
+        setEvents(eventsMap);
+      } else {
+        console.error("Failed to fetch schedules:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching schedules:", error);
+    }
+  };
+
+  // Fetch draft posts
+  const fetchDraftPosts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/schedules/draft-posts`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const posts = await response.json();
+        console.log("Draft posts fetched:", posts);
+        setDraftPosts(posts);
+      } else {
+        console.error("Failed to fetch draft posts:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching draft posts:", error);
+    }
+  };
+
+  // Initialize
   useEffect(() => {
     const now = new Date();
-    const d2 = new Date(now.getFullYear(), now.getMonth(), 2);
-    const key = iso(d2);
-
-    setEvents({
-      [key]: [{ title: "FB: Giới thiệu menu Noel", channel: "fb", note: "" }]
-    });
-
     setFormData(prev => ({ ...prev, date: iso(now) }));
+    fetchSchedules();
+    fetchDraftPosts();
   }, []);
 
   // Get calendar data
@@ -106,8 +165,8 @@ export default function Schedule({ navigate }) {
     setFormData(prev => ({ ...prev, date: key }));
   };
 
-  const handleAddEvent = () => {
-    const { title, date, channel, note } = formData;
+  const handleAddEvent = async () => {
+    const { title, date, channel, post_id } = formData;
 
     if (!title.trim()) {
       alert("Nhập tiêu đề nội dung");
@@ -116,17 +175,51 @@ export default function Schedule({ navigate }) {
 
     const dateStr = date || selectedISO || iso(new Date());
 
-    setEvents(prev => ({
-      ...prev,
-      [dateStr]: [...(prev[dateStr] || []), { title, channel, note }]
-    }));
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      
+      const response = await fetch(`${API_URL}/schedules`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title,
+          publish_date: dateStr,
+          channel,
+          post_id: post_id || null
+        })
+      });
 
-    // Reset form
-    setFormData(prev => ({ ...prev, title: "", note: "" }));
+      if (response.ok) {
+        const result = await response.json();
+        alert("Thêm lịch thành công!");
+        
+        // Refresh schedules
+        await fetchSchedules();
+        
+        // Reset form
+        setFormData(prev => ({ 
+          ...prev, 
+          title: "", 
+          post_id: ""
+        }));
 
-    // Navigate to the month of the new event
-    const d = new Date(dateStr);
-    setView(new Date(d.getFullYear(), d.getMonth(), 1));
+        // Navigate to the month of the new event
+        const d = new Date(dateStr);
+        setView(new Date(d.getFullYear(), d.getMonth(), 1));
+      } else {
+        const error = await response.json();
+        alert(error.message || "Lỗi khi thêm lịch");
+      }
+    } catch (error) {
+      console.error("Error adding schedule:", error);
+      alert("Lỗi kết nối server");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const calendarDays = getCalendarDays();
@@ -244,7 +337,7 @@ export default function Schedule({ navigate }) {
                       <div
                         key={i}
                         className={`event ${channelClass(ev.channel)}`}
-                        title={ev.note || ""}
+                        title={ev.post ? `Bài viết: ${ev.post.title}` : ev.note || ""}
                       >
                         {ev.title}
                       </div>
@@ -293,17 +386,45 @@ export default function Schedule({ navigate }) {
             </select>
           </div>
           <div className="form-row">
-            <label>Ghi chú</label>
-            <textarea
-              rows="3"
+            <label>Chọn bài viết (nháp)</label>
+            <select
               className="input"
-              placeholder="Mô tả nội dung hoặc link bài viết"
-              value={formData.note}
-              onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-            />
+              value={formData.post_id}
+              onChange={(e) => {
+                const postId = e.target.value;
+                setFormData({ ...formData, post_id: postId });
+                
+                // Auto-fill title từ post được chọn
+                if (postId) {
+                  const selectedPost = draftPosts.find(p => p.id === parseInt(postId));
+                  if (selectedPost && !formData.title) {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      post_id: postId,
+                      title: selectedPost.title 
+                    }));
+                  }
+                }
+              }}
+            >
+              <option value="">-- Không chọn bài viết --</option>
+              {draftPosts.map(post => (
+                <option key={post.id} value={post.id}>
+                  {post.title} ({post.tag})
+                </option>
+              ))}
+            </select>
+            <small style={{ color: "var(--text-2)", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+              Chọn bài viết nháp để liên kết với lịch xuất bản
+            </small>
           </div>
-          <button className="btn primary" style={{ width: "100%" }} onClick={handleAddEvent}>
-            Thêm vào lịch
+          <button 
+            className="btn primary" 
+            style={{ width: "100%" }} 
+            onClick={handleAddEvent}
+            disabled={loading}
+          >
+            {loading ? "Đang thêm..." : "Thêm vào lịch"}
           </button>
         </div>
 
@@ -331,6 +452,11 @@ export default function Schedule({ navigate }) {
                     <div style={{ color: "var(--text-2)", fontSize: ".9rem" }}>
                       {ev.date}
                     </div>
+                    {ev.post && (
+                      <div style={{ color: "var(--text-3)", fontSize: ".85rem", marginTop: "0.25rem" }}>
+                        📝 {ev.post.title}
+                      </div>
+                    )}
                   </div>
                   <span
                     className={`event ${channelClass(ev.channel)}`}

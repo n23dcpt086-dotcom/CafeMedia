@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import "../styles.css";
 
-const API_BASE = process.env.REACT_APP_API_BASE ?? "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_API_BASE ?? "http://localhost:5000/api";
 
 async function getHomePosts() {
   try {
@@ -16,27 +16,69 @@ async function getHomePosts() {
   }
 }
 
-// Mock comments API
-const commentsDb = {};
-
 async function getComments(postId) {
-  await new Promise(r => setTimeout(r, 300));
-  return commentsDb[postId] || [];
+  try {
+    const res = await fetch(`${API_BASE}/comments/${postId}`);
+    if (!res.ok) return [];
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return [];
+  }
 }
 
-async function addComment(postId, commentData) {
-  await new Promise(r => setTimeout(r, 200));
-  if (!commentsDb[postId]) {
-    commentsDb[postId] = [];
+async function addComment(postId, text) {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Chưa đăng nhập");
+    }
+
+    const res = await fetch(`${API_BASE}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ postId, text })
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || "Lỗi khi thêm bình luận");
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    throw error;
   }
-  const newComment = {
-    id: Date.now(),
-    author: commentData.author,
-    text: commentData.text,
-    createdAt: new Date().toISOString()
-  };
-  commentsDb[postId].unshift(newComment);
-  return newComment;
+}
+
+async function deleteComment(commentId) {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Chưa đăng nhập");
+    }
+
+    const res = await fetch(`${API_BASE}/comments/${commentId}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || "Lỗi khi xóa bình luận");
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    throw error;
+  }
 }
 
 export default function PostDetail({ navigate, postId }) {
@@ -46,27 +88,23 @@ export default function PostDetail({ navigate, postId }) {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [loadingCmt, setLoadingCmt] = useState(true);
+  const [sendingCmt, setSendingCmt] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-
     async function load() {
       const data = await getHomePosts();
       if (cancelled) return;
-
       const found = data.find((p) => String(p.id) === String(postId));
       setPost(found || null);
       setLoading(false);
     }
-
     load();
     return () => (cancelled = true);
   }, [postId]);
 
-  // Load comments
   useEffect(() => {
     let cancelled = false;
-
     async function loadCmt() {
       setLoadingCmt(true);
       const list = await getComments(postId);
@@ -75,21 +113,33 @@ export default function PostDetail({ navigate, postId }) {
         setLoadingCmt(false);
       }
     }
-
     loadCmt();
     return () => (cancelled = true);
   }, [postId]);
 
   const handleSendComment = async () => {
     if (!commentText.trim()) return;
+    if (sendingCmt) return;
+    setSendingCmt(true);
+    try {
+      const newCmt = await addComment(postId, commentText);
+      setComments(prev => [newCmt, ...prev]);
+      setCommentText("");
+    } catch (error) {
+      alert(error.message || "Lỗi khi gửi bình luận");
+    } finally {
+      setSendingCmt(false);
+    }
+  };
 
-    const newCmt = await addComment(postId, {
-      author: "Bạn",
-      text: commentText
-    });
-
-    setComments(prev => [newCmt, ...prev]);
-    setCommentText("");
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) return;
+    try {
+      await deleteComment(commentId);
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    } catch (error) {
+      alert(error.message || "Lỗi khi xóa bình luận");
+    }
   };
 
   if (loading) return <div className="post-detail-root"><div className="post-loading">Đang tải bài viết…</div></div>;
@@ -147,10 +197,9 @@ export default function PostDetail({ navigate, postId }) {
         )}
 
         <footer className="post-footer">
-          <span>💬 {comments.length ?? 0}</span>
+          <span>💬 {comments.length}</span>
         </footer>
 
-        {/* COMMENTS SECTION */}
         <section className="post-comments">
           <h2 className="post-comments-title">Bình luận</h2>
 
@@ -166,9 +215,14 @@ export default function PostDetail({ navigate, postId }) {
                   handleSendComment();
                 }
               }}
+              disabled={sendingCmt}
             />
-            <button className="post-comment-btn" onClick={handleSendComment}>
-              Gửi
+            <button
+              className="post-comment-btn"
+              onClick={handleSendComment}
+              disabled={sendingCmt || !commentText.trim()}
+            >
+              {sendingCmt ? "Đang gửi..." : "Gửi"}
             </button>
           </div>
 
@@ -180,10 +234,28 @@ export default function PostDetail({ navigate, postId }) {
             <div className="post-comment-list">
               {comments.map((c) => (
                 <div className="post-comment-item" key={c.id}>
-                  <div className="post-comment-author">{c.author}</div>
+                  <div className="post-comment-header">
+                    <div className="post-comment-author-info">
+                      <span className="post-comment-avatar">{c.avatar || "👤"}</span>
+                      <span className="post-comment-author">{c.author}</span>
+                    </div>
+                    <button
+                      className="post-comment-delete"
+                      onClick={() => handleDeleteComment(c.id)}
+                      title="Xóa bình luận"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                   <div className="post-comment-text">{c.text}</div>
                   <div className="post-comment-time">
-                    {new Date(c.createdAt).toLocaleString("vi-VN")}
+                    {new Date(c.createdAt).toLocaleString("vi-VN", {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </div>
                 </div>
               ))}
