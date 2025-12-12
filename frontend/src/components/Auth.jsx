@@ -211,7 +211,7 @@ export default function Auth({ navigate }) {
                   id="email"
                   className="input"
                   type="email"
-                  placeholder="ban@company.com"
+                  placeholder="example@gmail.com"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   required
@@ -283,7 +283,7 @@ export default function Auth({ navigate }) {
                   id="semail"
                   className="input"
                   type="email"
-                  placeholder="ban@company.com"
+                  placeholder="example@gmail.com"
                   value={signEmail}
                   onChange={(e) => setSignEmail(e.target.value)}
                   required

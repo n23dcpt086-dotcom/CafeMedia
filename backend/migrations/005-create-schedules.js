@@ -14,8 +14,8 @@ module.exports = {
         type: Sequelize.STRING(255),
         allowNull: false
       },
-      publish_date: {
-        type: Sequelize.DATEONLY,
+      publish_time: {
+        type: Sequelize.DATE,
         allowNull: false
       },
       channel: {
@@ -58,14 +58,12 @@ module.exports = {
     });
 
     // Tạo indexes
-    await queryInterface.addIndex('schedules', ['publish_date'], {
-      name: 'idx_date'
-    });
-    
+    await queryInterface.addIndex('schedules', ['publish_time'], { name: 'idx_publish_time' });
+
     await queryInterface.addIndex('schedules', ['account_id'], {
       name: 'idx_account'
     });
-    
+
     await queryInterface.addIndex('schedules', ['channel'], {
       name: 'idx_channel'
     });

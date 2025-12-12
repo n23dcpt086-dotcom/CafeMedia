@@ -1,9 +1,11 @@
 // server.js
-
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { sequelize } = require("./models");
+const db = require("./models");
+const { sequelize } = db;
+
+const startSchedulePublisherJob = require("./jobs/schedulePublisher");
 
 const app = express();
 const PORT = 5000;
@@ -14,11 +16,11 @@ app.use(express.json());
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/posts", require("./routes/posts"));
-app.use('/api/comments', require('./routes/comments'));
-app.use('/api/schedules', require('./routes/schedules'));
+app.use("/api/comments", require("./routes/comments"));
+app.use("/api/schedules", require("./routes/schedules"));
 
 sequelize.authenticate().then(() => {
-  console.log("Database connected");
+  startSchedulePublisherJob(db, { intervalMs: 30_000, graceMs: 60_000 });
 });
 
 app.listen(PORT, () => {

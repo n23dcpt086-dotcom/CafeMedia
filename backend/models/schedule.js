@@ -11,8 +11,8 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(255),
       allowNull: false
     },
-    publish_date: {
-      type: DataTypes.DATEONLY,
+    publish_time: {
+      type: DataTypes.DATE,
       allowNull: false
     },
     channel: {
@@ -49,7 +49,7 @@ module.exports = (sequelize) => {
     tableName: 'schedules',
     timestamps: false,
     indexes: [
-      { fields: ['publish_date'] },
+      { fields: ['publish_time'] },
       { fields: ['account_id'] },
       { fields: ['channel'] }
     ]
