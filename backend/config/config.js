@@ -7,6 +7,6 @@ module.exports = {
   host: 'localhost',
   dialect: 'mysql',
   logging: false,
-  jwtSecret: "CHANGE_THIS_SECRET",
+  jwtSecret: "CafeMedia",
   jwtExpiresIn: "7d"
 };
