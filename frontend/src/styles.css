@@ -3939,3 +3939,108 @@ label {
   border-radius: 10px;
   font-weight: 600;
 }
+/* ============================================================
+   EDITOR PAGE – FIX OVERRIDES (paste at end of styles.css)
+   ============================================================ */
+
+/* 1) Khóa layout đúng cho Editor (ưu tiên hơn .app:not(.dashboard-page) .content) */
+.app .content.editor-2col {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 360px !important;
+  gap: 1rem !important;
+  padding: 1rem !important;
+  align-items: start;
+}
+
+/* 2) Cột trái không bị tràn ngang */
+.app .content.editor-2col .editor-left {
+  min-width: 0;
+}
+
+/* 3) Editor contentEditable hiển thị ổn định */
+.app .content.editor-2col .editor {
+  width: 100%;
+  min-height: 420px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  line-height: 1.7;
+  overflow: auto;
+}
+
+/* 4) Fix “nhảy layout” khi focus tiêu đề (do padding bị thêm vào lúc focus) */
+.app .content.editor-2col .title-input {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.3;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;              /* giữ nguyên */
+  margin: 0;
+  width: 100%;
+  color: var(--text);
+}
+
+.app .content.editor-2col .title-input:focus {
+  box-shadow: 0 0 0 3px var(--teal-50);
+  border-radius: 8px;
+  /* KHÔNG set padding ở focus để tránh “nhảy” */
+}
+
+/* 5) Cột phải sticky đúng và không bị kéo giãn */
+.app .content.editor-2col .editor-side {
+  align-self: start;
+  position: sticky;
+  top: 90px;
+  height: fit-content;
+  display: grid;
+  gap: 1.2rem;
+}
+
+/* 6) Card trong cột phải không bị “xấu” do rule chung */
+.app .content.editor-2col .editor-side .card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  padding: 1rem 1.1rem;
+}
+
+/* 7) List bài viết: tránh crash khi title dài */
+.app .content.editor-2col .mypost-item strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 8) Responsive: xuống 1 cột */
+@media (max-width: 1100px) {
+  .app .content.editor-2col {
+    grid-template-columns: 1fr !important;
+  }
+
+  .app .content.editor-2col .editor-side {
+    position: static;
+    top: auto;
+  }
+}
+
+/* 9) Mobile: giảm padding để không tràn */
+@media (max-width: 768px) {
+  .app .content.editor-2col {
+    padding: 0.75rem !important;
+  }
+
+  .app .content.editor-2col .editor {
+    min-height: 300px;
+  }
+
+  .app .content.editor-2col .title-input {
+    font-size: 24px;
+  }
+}
