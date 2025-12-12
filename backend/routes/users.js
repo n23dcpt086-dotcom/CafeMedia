@@ -1,3 +1,4 @@
+// routes/users.js
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
@@ -5,71 +6,66 @@ const bcrypt = require("bcrypt");
 const { Account } = require("../models");
 const config = require("../config/config");
 
-// Middleware kiểm tra JWT
 function authRequired(req, res, next) {
-    const header = req.headers.authorization;
-    if (!header) return res.status(401).json({ message: "Thiếu token" });
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ message: "Thiếu token" });
 
-    const token = header.replace("Bearer ", "");
-    try {
-        const decoded = jwt.verify(token, config.jwtSecret);
-        req.user = decoded;
-        next();
-    } catch {
-        return res.status(401).json({ message: "Token không hợp lệ" });
-    }
+  const token = header.replace("Bearer ", "");
+  try {
+    const decoded = jwt.verify(token, config.jwtSecret);
+    req.user = decoded;
+    next();
+  } catch {
+    return res.status(401).json({ message: "Token không hợp lệ" });
+  }
 }
 
 // GET /api/users/me
 router.get("/me", authRequired, async (req, res) => {
-    if (req.user.role !== "user") return res.status(403).json({ message: "Không có quyền" });
+  const acc = await Account.findByPk(req.user.id);
+  if (!acc) return res.status(404).json({ message: "Không tìm thấy tài khoản" });
 
-    const user = await Account.findByPk(req.user.id);
-    if (!user) return res.status(404).json({ message: "Không tìm thấy user" });
-
-    return res.json({
-        id: user.id,
-        name: user.name,
-        dateOfBirth: user.date_of_birth,
-        phone: user.phone,
-        email: user.email,
-        avatar: user.avatar,
-        role: user.role,
-        createdAt: user.created_at
-    });
+  return res.json({
+    id: acc.id,
+    name: acc.name,
+    dateOfBirth: acc.date_of_birth,
+    phone: acc.phone,
+    email: acc.email,
+    avatar: acc.avatar,
+    role: acc.role,
+    createdAt: acc.created_at,
+    updatedAt: acc.updated_at
+  });
 });
-
 
 // PATCH /api/users/me
 router.patch("/me", authRequired, async (req, res) => {
-    if (req.user.role !== "user") return res.status(403).json({ message: "Không có quyền" });
+  const acc = await Account.findByPk(req.user.id);
+  if (!acc) return res.status(404).json({ message: "Không tìm thấy tài khoản" });
 
-    const user = await Account.findByPk(req.user.id);
-    if (!user) return res.status(404).json({ message: "Không tìm thấy user" });
+  const { name, dateOfBirth, phone, avatar, oldPassword, newPassword } = req.body;
 
-    const { name, dateOfBirth, phone, avatar, oldPassword, newPassword } = req.body;
+  if (req.body.email) {
+    return res.status(400).json({ message: "Không được phép thay đổi email" });
+  }
 
-    if (req.body.email)
-        return res.status(400).json({ message: "Không được phép thay đổi email" });
-    if (name !== undefined) user.name = name;
-    if (dateOfBirth !== undefined) user.date_of_birth = dateOfBirth;
-    if (phone !== undefined) user.phone = phone;
-    if (avatar !== undefined) user.avatar = avatar;
+  if (name !== undefined) acc.name = name;
+  if (dateOfBirth !== undefined) acc.date_of_birth = dateOfBirth;
+  if (phone !== undefined) acc.phone = phone;
+  if (avatar !== undefined) acc.avatar = avatar;
 
-    if (oldPassword || newPassword) {
-        if (!oldPassword || !newPassword)
-            return res.status(400).json({ message: "Thiếu mật khẩu cũ hoặc mới" });
-
-        const ok = await bcrypt.compare(oldPassword, user.password);
-        if (!ok) return res.status(400).json({ message: "Mật khẩu cũ không đúng" });
-
-        const hashed = await bcrypt.hash(newPassword, 10);
-        user.password = hashed;
+  if (oldPassword || newPassword) {
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Thiếu mật khẩu cũ hoặc mới" });
     }
+    const ok = await bcrypt.compare(oldPassword, acc.password);
+    if (!ok) return res.status(400).json({ message: "Mật khẩu cũ không đúng" });
 
-    await user.save();
+    acc.password = await bcrypt.hash(newPassword, 10);
+  }
 
-    return res.json({ message: "Cập nhật thành công" });
+  await acc.save();
+  return res.json({ message: "Cập nhật thành công" });
 });
 
 module.exports = router;

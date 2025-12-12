@@ -22,7 +22,6 @@ function auth(req, res, next) {
 
 const toISO = (d) => (d ? new Date(d).toISOString() : null);
 
-// GET tất cả lịch của user hiện tại
 router.get("/", auth, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -59,7 +58,6 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// GET danh sách bài viết draft để chọn (cho cả tạo + sửa)
 router.get("/draft-posts", auth, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -80,7 +78,6 @@ router.get("/draft-posts", auth, async (req, res) => {
   }
 });
 
-// POST tạo lịch mới
 router.post("/", auth, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -135,7 +132,6 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-// PUT cập nhật lịch (title, publish_time, note, post_id)
 router.put("/:id", auth, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -173,7 +169,6 @@ router.put("/:id", auth, async (req, res) => {
       schedule.note = note === null ? null : String(note);
     }
 
-    // post_id: cho phép null để bỏ liên kết, hoặc id draft để liên kết
     if (post_id !== undefined) {
       if (post_id === null || post_id === "" || post_id === 0) {
         schedule.post_id = null;
@@ -211,7 +206,6 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-// DELETE xóa lịch
 router.delete("/:id", auth, async (req, res) => {
   try {
     const userId = req.user.id;

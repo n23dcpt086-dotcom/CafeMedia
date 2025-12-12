@@ -21,7 +21,6 @@ function auth(req, res, next) {
     }
 }
 
-// GET tất cả comments của một bài viết
 router.get("/:postId", async (req, res) => {
     try {
         const postId = parseInt(req.params.postId, 10);
@@ -56,7 +55,6 @@ router.get("/:postId", async (req, res) => {
     }
 });
 
-// POST tạo comment mới
 router.post("/", auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -97,7 +95,6 @@ router.post("/", auth, async (req, res) => {
     }
 });
 
-// DELETE xóa comment (chỉ tác giả hoặc admin)
 router.delete("/:commentId", auth, async (req, res) => {
     try {
         const userId = req.user.id;

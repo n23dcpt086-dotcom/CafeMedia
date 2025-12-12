@@ -154,11 +154,11 @@ export default function Auth({ navigate }) {
               </div>
               <div className="kpi">
                 <div className="n">134</div>
-                <div>Bài chờ duyệt</div>
+                <div>Bài xuất bản</div>
               </div>
               <div className="kpi">
-                <div className="n">92%</div>
-                <div>Đúng hạn tháng này</div>
+                <div className="n">52%</div>
+                <div>Số người dùng tăng tháng này</div>
               </div>
             </div>
           </div>

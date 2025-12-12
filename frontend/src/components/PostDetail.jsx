@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import "../styles.css";
 
-const API_BASE = process.env.REACT_APP_API_BASE ?? "http://localhost:5000/api";
+const API_BASE = "http://localhost:5000/api";
 
 async function getHomePosts() {
   try {

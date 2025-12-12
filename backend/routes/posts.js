@@ -21,7 +21,6 @@ function auth(req, res, next) {
     }
 }
 
-// GET tất cả bài viết công khai
 router.get("/", async (req, res) => {
     try {
         const posts = await Post.findAll({
@@ -92,7 +91,6 @@ router.get("/", async (req, res) => {
     }
 });
 
-// GET tất cả bài của user hiện tại
 router.get("/me", auth, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -133,13 +131,10 @@ router.get("/me", auth, async (req, res) => {
     }
 });
 
-// POST tạo bài viết mới hoặc cập nhật
 router.post("/", auth, async (req, res) => {
     try {
         const userId = req.user.id;
         const { id, title, body, tag, imageUrl, imageFile, videoUrl, videoFile, status, publishedAt } = req.body;
-        
-        // Validation
         if (!title || title.trim() === "") {
             return res.status(400).json({ message: "Tiêu đề không được để trống" });
         }
